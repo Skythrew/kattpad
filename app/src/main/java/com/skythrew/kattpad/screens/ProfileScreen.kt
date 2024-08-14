@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -84,31 +83,39 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
-            Column (
-                modifier = Modifier.fillMaxWidth(),
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                AsyncImage(
-                    model = user?.data?.avatar,
-                    contentDescription = stringResource(id = R.string.profile_picture),
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .width(50.dp)
-                )
+                Row (
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    AsyncImage(
+                        model = user!!.data.avatar,
+                        contentDescription = stringResource(id = R.string.profile_picture),
+                        modifier = Modifier.clip(CircleShape)
+                    )
+                    Text(
+                        user?.data?.username!!,
+                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 Text(
-                    user?.data?.username!!,
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    "${stringResource(id = R.string.joined_on)} ${DateFormat.getDateFormat(LocalContext.current).format(user?.data?.createDate!!)}",
+                    "${stringResource(id = R.string.joined_on)} ${
+                        DateFormat.getDateFormat(
+                            LocalContext.current
+                        ).format(user?.data?.createDate!!)
+                    }",
                     fontWeight = FontWeight.Thin
                 )
 
                 Button(onClick = { /*TODO*/ }) {
-                    Row (
+                    Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
@@ -118,17 +125,15 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                 }
             }
             HorizontalDivider()
-            Column (
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp),
+                    .padding(horizontal = 10.dp)
+                    .weight(4F),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                Text(stringResource(id = R.string.stories), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 StoriesRow(navController = navController, user = user!!)
-                Text(stringResource(id = R.string.followers), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 FollowersRow(navController = navController, user = user!!)
-                Text(stringResource(id = R.string.following), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 FollowingRow(navController = navController, user = user!!)
             }
         }
@@ -138,6 +143,8 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
 @Composable
 fun StoriesRow(navController: NavController, user: User) {
     val pagerState = rememberPagerState(pageCount = { ceil(user.data.numStoriesPublished!!.toDouble() / 3).toInt() })
+
+    Text(stringResource(id = R.string.stories), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
 
     HorizontalPager(state = pagerState) {page ->
         var stories: List<Story> by remember {
@@ -239,6 +246,8 @@ fun FollowersRow(navController: NavController, user: User) {
         isLoading = false
     }
 
+    Text(stringResource(id = R.string.followers), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+
     LazyRow (
         state = lazyRowState,
         verticalAlignment = Alignment.CenterVertically,
@@ -297,6 +306,8 @@ fun FollowingRow(navController: NavController, user: User) {
         following = following.plus(user.fetchFollowing(setOf("username", "avatar"), offset=offset))
         isLoading = false
     }
+
+    Text(stringResource(id = R.string.following), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
 
     LazyRow (
         state = lazyRowState,
