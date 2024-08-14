@@ -1,5 +1,6 @@
 package com.skythrew.kattpad.screens
 
+import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,8 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -22,27 +26,33 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.skythrew.kattpad.R
+import com.skythrew.kattpad.api.Comment
 import com.skythrew.kattpad.api.Part
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
@@ -102,6 +112,10 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
     else {
         val scrollBehaviour = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
+        val showCommentsModal = remember {
+            mutableStateOf(false)
+        }
+
         Scaffold (
             bottomBar = {
                 BottomAppBar (
@@ -113,7 +127,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                         ) {
                             NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.visibility), number = part?.data?.readCount)
                             NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_favorite_24), number = part?.data?.voteCount)
-                            NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = part?.data?.commentCount)
+                            NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = part?.data?.commentCount, onClick = {showCommentsModal.value = true})
                         }
                     },
                     scrollBehavior = scrollBehaviour
@@ -161,6 +175,9 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }
                 }
             }
+
+            if (showCommentsModal.value)
+                CommentsModal(part = part!!, showCommentsModal)
         }
     }
 }
@@ -180,6 +197,71 @@ fun NumberIconButton(icon: ImageVector, number: Int?, contentDescription: String
         Column (verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(icon, contentDescription = contentDescription)
             Text(getFormattedNumber(number))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CommentsModal(part: Part, showModal: MutableState<Boolean>) {
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+
+    var comments: List<Comment> by remember {
+        mutableStateOf(listOf())
+    }
+
+    LaunchedEffect(key1 = part) {
+        isLoading = true
+        comments = part.fetchComments()
+        isLoading = false
+    }
+
+    ModalBottomSheet(onDismissRequest = { showModal.value = false }) {
+        if (isLoading) {
+            Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+            }
+        }
+        else {
+            LazyColumn (
+              verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(comments) {
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Column {
+                            AsyncImage(
+                                model = it.data.user.avatar,
+                                contentDescription = stringResource(id = R.string.profile_picture),
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .height(40.dp)
+                            )
+                        }
+                        Column (modifier = Modifier.weight(1F)) {
+                            Text(
+                                it.data.user.username,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                it.data.text
+                            )
+                            Text(
+                                DateFormat.getDateFormat(LocalContext.current).format(it.data.created),
+                                fontWeight = FontWeight.Thin
+                            )
+                        }
+                        Column {
+                            NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = it.data.sentiments.like?.count)
+                        }
+                    }
+                }
+            }
         }
     }
 }
