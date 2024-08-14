@@ -54,7 +54,7 @@ import kotlin.reflect.KSuspendFunction2
 import com.skythrew.kattpad.R
 
 @Composable
-fun DiscoveryScreen(padding: PaddingValues, navController: NavController) {
+fun HomeScreen(padding: PaddingValues, navController: NavController) {
 
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -278,4 +278,4 @@ data class SearchTab<T>(
 
 @Keep
 @Serializable
-object DiscoveryScreen
+object HomeScreen

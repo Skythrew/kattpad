@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.skythrew.kattpad.api.Wattpad
-import com.skythrew.kattpad.screens.DiscoveryScreen
+import com.skythrew.kattpad.screens.HomeScreen
 import com.skythrew.kattpad.screens.PartScreen
 import com.skythrew.kattpad.screens.ProfileScreen
 import com.skythrew.kattpad.screens.StoryScreen
@@ -42,10 +42,10 @@ class MainActivity : ComponentActivity() {
                             GenericNav(navController = navController)
                     }
                 ){ padding ->
-                    NavHost(navController = navController, startDestination = DiscoveryScreen) {
-                        composable<DiscoveryScreen> {
+                    NavHost(navController = navController, startDestination = HomeScreen) {
+                        composable<HomeScreen> {
                             showBottomBar = true
-                            DiscoveryScreen(padding = padding, navController = navController)
+                            HomeScreen(padding = padding, navController = navController)
                         }
 
                         composable<StoryScreen> {
