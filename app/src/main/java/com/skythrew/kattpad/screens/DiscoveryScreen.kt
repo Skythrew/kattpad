@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KSuspendFunction2
+import com.skythrew.kattpad.R
 
 @Composable
 fun DiscoveryScreen(padding: PaddingValues, navController: NavController) {
@@ -84,7 +86,7 @@ fun DiscoverySearchBar(navController: NavController) {
     val client = Wattpad()
 
     val tabs = listOf(
-        SearchTab("Histoires", client::searchStory) { data, offset ->
+        SearchTab(stringResource(id = R.string.stories), client::searchStory) { data, offset ->
             val listState = remember {
                 LazyListState()
             }
@@ -107,7 +109,9 @@ fun DiscoverySearchBar(navController: NavController) {
                                 }
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                AsyncImage(model = it.data.cover, contentDescription = "Couverture")
+                                AsyncImage(model = it.data.cover, contentDescription = stringResource(
+                                    id = R.string.cover
+                                ))
                                 Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                     Text(
                                         text = it.data.title!!,
@@ -129,7 +133,7 @@ fun DiscoverySearchBar(navController: NavController) {
                 }
             }
         },
-        SearchTab("Profils", client::searchUser) { data, _ ->
+        SearchTab(stringResource(id = R.string.profiles), client::searchUser) { data, _ ->
             LazyColumn (modifier = Modifier.fillMaxSize()){
                 items(data) {
                     Box (modifier = Modifier.clickable {
@@ -182,7 +186,7 @@ fun DiscoverySearchBar(navController: NavController) {
         onActiveChange = {activeSearch = it},
         placeholder = {
             Text(
-                "Qu'allez-vous découvrir aujourd'hui ?"
+                stringResource(id = R.string.discovery_placeholder)
             )
         },
         trailingIcon = { Icon(
@@ -248,7 +252,7 @@ data class SearchTab<T>(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Aucun résultat",
+                            stringResource(id = R.string.no_result),
                             fontWeight = FontWeight.Thin
                         )
                     }

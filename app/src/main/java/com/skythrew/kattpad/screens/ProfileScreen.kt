@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import com.skythrew.kattpad.api.User
 import com.skythrew.kattpad.api.Wattpad
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
+import com.skythrew.kattpad.R
 
 @Composable
 fun ProfileScreen(padding: PaddingValues, navController: NavController, client: Wattpad, username: String) {
@@ -89,7 +91,7 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
             ) {
                 AsyncImage(
                     model = user?.data?.avatar,
-                    contentDescription = "Image de profil",
+                    contentDescription = stringResource(id = R.string.profile_picture),
                     modifier = Modifier
                         .clip(CircleShape)
                         .width(50.dp)
@@ -101,7 +103,7 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                 )
 
                 Text(
-                    "S'est inscrit(e) le ${DateFormat.getDateFormat(LocalContext.current).format(user?.data?.createDate!!)}",
+                    "${stringResource(id = R.string.joined_on)} ${DateFormat.getDateFormat(LocalContext.current).format(user?.data?.createDate!!)}",
                     fontWeight = FontWeight.Thin
                 )
 
@@ -110,21 +112,23 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Icon(Icons.Default.AddCircle, contentDescription = "Icône d'abonnement")
-                        Text("Suivre")
+                        Icon(Icons.Default.AddCircle, contentDescription = null)
+                        Text(stringResource(id = R.string.follow))
                     }
                 }
             }
             HorizontalDivider()
             Column (
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                Text("Histoires", fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+                Text(stringResource(id = R.string.stories), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 StoriesRow(navController = navController, user = user!!)
-                Text("Abonnés", fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+                Text(stringResource(id = R.string.followers), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 FollowersRow(navController = navController, user = user!!)
-                Text("Abonnements", fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+                Text(stringResource(id = R.string.following), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
                 FollowingRow(navController = navController, user = user!!)
             }
         }
@@ -178,7 +182,7 @@ fun StoriesRow(navController: NavController, user: User) {
                         ) {
                             AsyncImage(
                                 model = story.data.cover,
-                                contentDescription = "Couverture",
+                                contentDescription = stringResource(id = R.string.cover),
                                 modifier = Modifier.fillMaxWidth()
                             )
                             HorizontalDivider(
@@ -252,7 +256,7 @@ fun FollowersRow(navController: NavController, user: User) {
             {
                 AsyncImage(
                     model = it.data.avatar,
-                    contentDescription = "Image de profil",
+                    contentDescription = stringResource(id = R.string.profile_picture),
                     modifier = Modifier.clip(CircleShape)
                 )
                 Text(
@@ -311,7 +315,7 @@ fun FollowingRow(navController: NavController, user: User) {
             {
                 AsyncImage(
                     model = it.data.avatar,
-                    contentDescription = "Image de profil",
+                    contentDescription = stringResource(id = R.string.profile_picture),
                     modifier = Modifier.clip(CircleShape)
                 )
                 Text(
