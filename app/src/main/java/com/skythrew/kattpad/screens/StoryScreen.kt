@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -91,10 +92,14 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
             else
                 Column (horizontalAlignment = Alignment.CenterHorizontally) {
                     Column (verticalArrangement = Arrangement.spacedBy(15.dp), horizontalAlignment = Alignment.CenterHorizontally){
-                        AsyncImage(model = searchResult?.data?.cover, contentDescription = "Couverture")
+                        AsyncImage(model = searchResult?.data?.cover, contentDescription = stringResource(
+                            id = R.string.cover
+                        ))
                         Text(text = searchResult?.data?.title!!, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {  }) {
-                            AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = "Image de profil")
+                            AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = stringResource(
+                                id = R.string.profile_picture
+                            ))
                             Text(searchResult?.data?.user?.username ?: "", fontWeight = FontWeight.Bold)
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -104,13 +109,13 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                                         ImageVector.vectorResource(R.drawable.outline_menu_book_24),
                                         contentDescription = ""
                                     )
-                                    Text("Lire")
+                                    Text(stringResource(id = R.string.read))
                                 }
                             }
                             Button(shape = CircleShape, onClick = { showBottomSheet = true }) {
                                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)){
                                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "")
-                                    Text("${searchResult?.data?.numParts} chapitres")
+                                    Text("${searchResult?.data?.numParts} ${stringResource(id = R.string.chapters)}")
                                 }
 
                                 if (showBottomSheet)
@@ -120,7 +125,12 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                                                 Box (modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable {
-                                                        navController.navigate(PartScreen(partId = part.id!!, storyId = storyId))
+                                                        navController.navigate(
+                                                            PartScreen(
+                                                                partId = part.id!!,
+                                                                storyId = storyId
+                                                            )
+                                                        )
                                                     }
                                                 ) {
                                                     Text(part.title!!, modifier = Modifier.padding(10.dp), fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.Bold)
@@ -131,7 +141,7 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                             }
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(10.dp)){
-                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.visibility), number = searchResult?.data?.readCount!!, altText = "Compteur de lectures")
+                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.visibility), number = searchResult?.data?.readCount!!)
                             NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = searchResult?.data?.commentCount!!)
                             NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_favorite_24), number = searchResult?.data?.voteCount!!)
                         }

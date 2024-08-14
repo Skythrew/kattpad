@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -128,7 +129,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Chapitre précédent"
+                            contentDescription = stringResource(id = R.string.prev_chapter)
                         )
                     }
 
@@ -143,7 +144,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "Chapitre suivant"
+                            contentDescription = stringResource(id = R.string.next_chapter)
                         )
                     }
                 }
