@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -102,7 +101,6 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
     }
     else {
         val scrollBehaviour = BottomAppBarDefaults.exitAlwaysScrollBehavior()
-        val scrollState = rememberScrollState()
 
         Scaffold (
             bottomBar = {
@@ -122,7 +120,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                 )
             }
         ) {padding ->
-            Column (modifier = Modifier.padding(padding), verticalArrangement = Arrangement.SpaceAround) {
+            Column (modifier = Modifier.padding(padding)) {
                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     IconButton(enabled = prevPartId != null, onClick = {
                         navController.navigate(PartScreen(partId = prevPartId!!, storyId = storyId))
@@ -149,15 +147,18 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }
                 }
                 HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
-                Column (modifier = Modifier
-                    .nestedScroll(scrollBehaviour.nestedScrollConnection)
-                    .background(Color.White)
-                    .verticalScroll(scrollState)
+                LazyColumn (
+                    modifier = Modifier
+                        .nestedScroll(scrollBehaviour.nestedScrollConnection)
+                        .background(Color.White)
+                        .fillMaxSize()
                 ) {
-                    Text(
-                        HtmlCompat.fromHtml(partText!!, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING).toString(),
-                        modifier = Modifier.padding(10.dp)
-                    )
+                    item {
+                        Text(
+                            HtmlCompat.fromHtml(partText!!, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING).toString(),
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
                 }
             }
         }
