@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kattpad</string>
+    <string name="discovery_tab_name">Découverte</string>
+    <string name="no_result">Aucun résultat</string>
+    <string name="stories">Histoires</string>
+    <string name="cover">Couverture</string>
+    <string name="profiles">Profils</string>
+    <string name="discovery_placeholder">Qu\'allez-vous découvrir aujourd\'hui ?</string>
+    <string name="followers">Abonnés</string>
+    <string name="following">Abonnements</string>
+    <string name="follow">Suivre</string>
+    <string name="profile_picture">Photo de profil</string>
+    <string name="joined_on">S\'est inscrit(e) le</string>
+    <string name="prev_chapter">Chapitre précédent</string>
+    <string name="next_chapter">Chapitre suivant</string>
+    <string name="read">Lire</string>
+    <string name="chapters">Chapitres</string>
+</resources>
