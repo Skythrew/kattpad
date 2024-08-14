@@ -96,7 +96,9 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                             id = R.string.cover
                         ))
                         Text(text = searchResult?.data?.title!!, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
-                        Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {  }) {
+                        Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
+                            navController.navigate(ProfileScreen(searchResult!!.data.user.username))
+                        }) {
                             AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = stringResource(
                                 id = R.string.profile_picture
                             ))
