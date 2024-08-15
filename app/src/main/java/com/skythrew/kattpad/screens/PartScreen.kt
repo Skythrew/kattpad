@@ -177,7 +177,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
             }
 
             if (showCommentsModal.value)
-                CommentsModal(part = part!!, showCommentsModal)
+                CommentsModal(navController = navController, part = part!!, showCommentsModal)
         }
     }
 }
@@ -204,7 +204,7 @@ fun NumberIconButton(icon: ImageVector, number: Int?, contentDescription: String
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommentsModal(part: Part, showModal: MutableState<Boolean>) {
+fun CommentsModal(navController: NavController, part: Part, showModal: MutableState<Boolean>) {
     var isLoading by remember {
         mutableStateOf(true)
     }
@@ -231,7 +231,7 @@ fun CommentsModal(part: Part, showModal: MutableState<Boolean>) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(comments) {
-                    CommentRow(comment = it)
+                    CommentRow(navController = navController, comment = it)
                 }
             }
         }
@@ -239,7 +239,7 @@ fun CommentsModal(part: Part, showModal: MutableState<Boolean>) {
 }
 
 @Composable
-fun CommentRow(comment: Comment) {
+fun CommentRow(navController: NavController, comment: Comment) {
     var showReplies by remember {
         mutableStateOf(false)
     }
@@ -273,38 +273,41 @@ fun CommentRow(comment: Comment) {
                     .height(40.dp)
             )
         }
-        Column (modifier = Modifier.weight(1F)) {
-            Text(
-                comment.data.user.username,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                comment.data.text
-            )
-            Text(
-                DateFormat.getDateFormat(LocalContext.current).format(comment.data.created),
-                fontWeight = FontWeight.Thin
-            )
-            
-            if (comment.data.replyCount > 0)
-                TextButton(
-                    onClick = { showReplies = !showReplies }
-                ) {
-                    Text("${when(showReplies) { true -> stringResource(id = R.string.hide) false -> stringResource(id = R.string.show)}} ${comment.data.replyCount} ${stringResource(id = R.string.replies)}")
+        Column (modifier = Modifier.weight(1F)){
+            Row  (modifier = Modifier.fillMaxWidth()){
+                Column (modifier = Modifier.weight(1F)) {
+                    Text(
+                        comment.data.user.username,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        comment.data.text
+                    )
+                    Text(
+                        DateFormat.getDateFormat(LocalContext.current).format(comment.data.created),
+                        fontWeight = FontWeight.Thin
+                    )
+
+                    if (comment.data.replyCount > 0)
+                        TextButton(
+                            onClick = { showReplies = !showReplies }
+                        ) {
+                            Text("${when(showReplies) { true -> stringResource(id = R.string.hide) false -> stringResource(id = R.string.show)}} ${comment.data.replyCount} ${stringResource(id = R.string.replies)}")
+                        }
                 }
-            
+                Column {
+                    NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = comment.data.sentiments.like?.count)
+                }
+            }
             if (showReplies) {
                 if (repliesLoading)
                     CircularProgressIndicator()
                 else {
                     for (answer in replies) {
-                        CommentRow(comment = answer)
+                        CommentRow(navController = navController, comment = answer)
                     }
                 }
             }
-        }
-        Column {
-            NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = comment.data.sentiments.like?.count)
         }
     }
 }
