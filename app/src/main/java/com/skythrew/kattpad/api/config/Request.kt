@@ -29,7 +29,7 @@ open class Request (val cookie: String = "") {
         ignoreUnknownKeys = true
     }
 
-    suspend fun post(url: String, data: Parameters): HttpResponse {
+    suspend fun simplePost(url: String, data: Parameters): HttpResponse {
         return client.submitForm(
             url,
             formParameters = data
