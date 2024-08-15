@@ -3,6 +3,7 @@ package com.skythrew.kattpad.screens
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -271,6 +272,7 @@ fun CommentRow(navController: NavController, comment: Comment) {
                 modifier = Modifier
                     .clip(CircleShape)
                     .height(40.dp)
+                    .clickable { navController.navigate(ProfileScreen(comment.data.user.username)) }
             )
         }
         Column (modifier = Modifier.weight(1F)){
