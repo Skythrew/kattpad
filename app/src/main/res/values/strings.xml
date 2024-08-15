@@ -16,4 +16,7 @@
     <string name="read">Read</string>
     <string name="chapters">Chapters</string>
     <string name="home">Home</string>
+    <string name="show">Show</string>
+    <string name="replies">replies</string>
+    <string name="hide">Hide</string>
 </resources>

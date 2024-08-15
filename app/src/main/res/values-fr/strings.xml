@@ -17,4 +17,7 @@
     <string name="read">Lire</string>
     <string name="chapters">Chapitres</string>
     <string name="home">Accueil</string>
+    <string name="show">Afficher</string>
+    <string name="replies">réponses</string>
+    <string name="hide">Cacher</string>
 </resources>
