@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
@@ -26,6 +27,13 @@ open class Request (val cookie: String = "") {
 
     val jsonDecoder = Json {
         ignoreUnknownKeys = true
+    }
+
+    suspend fun post(url: String, data: Parameters): HttpResponse {
+        return client.submitForm(
+            url,
+            formParameters = data
+        )
     }
 
     suspend fun simpleGet(url: String): HttpResponse {
