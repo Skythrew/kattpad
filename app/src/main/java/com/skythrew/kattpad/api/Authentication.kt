@@ -7,7 +7,7 @@ open class Authentication (cookie: String) : com.skythrew.kattpad.api.config.Req
     var loggedIn = false
 
     suspend fun login(username: String, password: String) {
-        val loginResponse = this.post("https://www.wattpad.com/login", parameters {
+        val loginResponse = this.simplePost("https://www.wattpad.com/login", parameters {
             append("username", username)
             append("password", password)
         })
