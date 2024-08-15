@@ -2,6 +2,7 @@ package com.skythrew.kattpad.api.config
 
 import io.ktor.client.*
 import io.ktor.client.plugins.compression.*
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -9,6 +10,7 @@ import kotlinx.serialization.json.Json
 
 open class Request (val cookie: String = "") {
     private val client = HttpClient {
+        install(HttpCookies)
         install(ContentEncoding) {
             deflate(1.0F)
             gzip(0.9F)
