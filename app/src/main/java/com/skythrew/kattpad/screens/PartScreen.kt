@@ -230,38 +230,80 @@ fun CommentsModal(part: Part, showModal: MutableState<Boolean>) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(comments) {
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Column {
-                            AsyncImage(
-                                model = it.data.user.avatar,
-                                contentDescription = stringResource(id = R.string.profile_picture),
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .height(40.dp)
-                            )
-                        }
-                        Column (modifier = Modifier.weight(1F)) {
-                            Text(
-                                it.data.user.username,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                it.data.text
-                            )
-                            Text(
-                                DateFormat.getDateFormat(LocalContext.current).format(it.data.created),
-                                fontWeight = FontWeight.Thin
-                            )
-                        }
-                        Column {
-                            NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = it.data.sentiments.like?.count)
-                        }
+                    CommentRow(comment = it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CommentRow(comment: Comment) {
+    var showReplies by remember {
+        mutableStateOf(false)
+    }
+    
+    var repliesLoading by remember {
+        mutableStateOf(true)
+    }
+    
+    var replies: List<Comment> by remember {
+        mutableStateOf(listOf())
+    }
+    
+    LaunchedEffect(key1 = showReplies) {
+        if (showReplies && replies.isEmpty()) {
+            repliesLoading = true
+            replies = comment.fetchReplies()
+            repliesLoading = false
+        }
+    }
+    
+    Row (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Column {
+            AsyncImage(
+                model = comment.data.user.avatar,
+                contentDescription = stringResource(id = R.string.profile_picture),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .height(40.dp)
+            )
+        }
+        Column (modifier = Modifier.weight(1F)) {
+            Text(
+                comment.data.user.username,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                comment.data.text
+            )
+            Text(
+                DateFormat.getDateFormat(LocalContext.current).format(comment.data.created),
+                fontWeight = FontWeight.Thin
+            )
+            
+            if (comment.data.replyCount > 0)
+                TextButton(
+                    onClick = { showReplies = !showReplies }
+                ) {
+                    Text("${when(showReplies) { true -> stringResource(id = R.string.hide) false -> stringResource(id = R.string.show)}} ${comment.data.replyCount} ${stringResource(id = R.string.replies)}")
+                }
+            
+            if (showReplies) {
+                if (repliesLoading)
+                    CircularProgressIndicator()
+                else {
+                    for (answer in replies) {
+                        CommentRow(comment = answer)
                     }
                 }
             }
+        }
+        Column {
+            NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = comment.data.sentiments.like?.count)
         }
     }
 }
