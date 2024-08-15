@@ -196,7 +196,8 @@ fun NumberIconButton(icon: ImageVector, number: Int?, contentDescription: String
     TextButton(colors = colors, onClick = onClick) {
         Column (verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(icon, contentDescription = contentDescription)
-            Text(getFormattedNumber(number))
+            if (number != null)
+                Text(getFormattedNumber(number))
         }
     }
 }
