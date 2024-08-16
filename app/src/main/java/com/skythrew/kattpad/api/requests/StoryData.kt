@@ -32,7 +32,8 @@ data class StoryPartData (
     val voteCount: Int? = null,
     val readCount: Int? = null,
     @SerialName("text_url") val textUrl: StoryPartTextUrl? = null,
-    @SerialName("group") val story: StoryData? = null
+    @SerialName("group") val story: StoryData? = null,
+    var voted: Boolean? = null
 )
 
 @Serializable
