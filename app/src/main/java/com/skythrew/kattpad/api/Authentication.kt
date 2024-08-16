@@ -1,10 +1,9 @@
 package com.skythrew.kattpad.api
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.parameters
 import io.ktor.http.setCookie
 
-open class Authentication (cookie: String) : com.skythrew.kattpad.api.config.Request(cookie) {
+open class Authentication : com.skythrew.kattpad.api.config.Request() {
     var loggedIn = false
 
     suspend fun login(username: String, password: String) {
@@ -21,10 +20,5 @@ open class Authentication (cookie: String) : com.skythrew.kattpad.api.config.Req
                 break
             }
         }
-    }
-
-    suspend fun loginByCookie() {
-        val loginResponse = this.simpleGet("https://www.wattpad.com/login")
-        loggedIn = loginResponse.status == HttpStatusCode.Found
     }
 }
