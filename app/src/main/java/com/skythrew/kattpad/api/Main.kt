@@ -10,7 +10,7 @@ import com.skythrew.kattpad.api.requests.StoryPartData
 import com.skythrew.kattpad.api.requests.SwimlaneItemData
 import com.skythrew.kattpad.api.requests.UserData
 
-class Wattpad (cookie: String = "") : Authentication(cookie) {
+class Wattpad : Authentication() {
     suspend fun fetchContinueReading(): ContinueReadingParsedData? {
         if (!this.loggedIn)
             return null

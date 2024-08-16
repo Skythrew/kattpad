@@ -1,23 +1,22 @@
 package com.skythrew.kattpad.api.config
 
-import io.ktor.client.*
-import io.ktor.client.plugins.compression.*
-import io.ktor.client.plugins.cookies.ConstantCookiesStorage
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.cookies.HttpCookies
-import io.ktor.client.request.*
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.request.get
+import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpMethod
+import io.ktor.http.Parameters
 import kotlinx.serialization.json.Json
 
-open class Request (val cookie: String = "") {
+open class Request {
     private val client = HttpClient {
-        followRedirects = false
-        install(HttpCookies) {
-            if (cookie.isNotBlank()) {
-                storage = ConstantCookiesStorage(Cookie(name = "token", value=cookie, domain = ".wattpad.com", encoding = CookieEncoding.RAW))
-            }
-        }
+        install(HttpCookies)
+
         install(ContentEncoding) {
             deflate(1.0F)
             gzip(0.9F)
