@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,7 +15,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.data.createSharedPreferences
 import com.skythrew.kattpad.screens.HomeScreen
+import com.skythrew.kattpad.screens.LoginScreen
 import com.skythrew.kattpad.screens.PartScreen
 import com.skythrew.kattpad.screens.ProfileScreen
 import com.skythrew.kattpad.screens.StoryScreen
@@ -25,15 +28,39 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val store = createSharedPreferences(applicationContext)
+
         val client = Wattpad()
 
         enableEdgeToEdge()
         setContent {
             KattpadTheme {
                 val navController = rememberNavController()
-                
+
                 var showBottomBar by remember {
                     mutableStateOf(true)
+                }
+
+                var isLogging by remember {
+                    mutableStateOf(false)
+                }
+
+                val isLogged = remember {
+                    mutableStateOf(false)
+                }
+
+                LaunchedEffect(Unit) {
+                    val username = store.getString("username", null)
+                    val password = store.getString("password", null)
+
+                    if (username != null && password != null) {
+                        isLogging = true
+
+                        client.login(username, password)
+                        isLogged.value = client.loggedIn
+
+                        isLogging = false
+                    }
                 }
 
                 Scaffold (
@@ -45,7 +72,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = HomeScreen) {
                         composable<HomeScreen> {
                             showBottomBar = true
-                            HomeScreen(padding = padding, navController = navController)
+                            HomeScreen(padding = padding, navController = navController, isLogging = isLogging, isLogged = isLogged.value)
                         }
 
                         composable<StoryScreen> {
@@ -70,6 +97,12 @@ class MainActivity : ComponentActivity() {
                             val args = it.toRoute<ProfileScreen>()
 
                             ProfileScreen(navController = navController, padding = padding, client = client, username = args.username)
+                        }
+
+                        composable<LoginScreen> {
+                            showBottomBar = false
+
+                            LoginScreen(padding, navController, client, store, isLogged)
                         }
                     }
                 }

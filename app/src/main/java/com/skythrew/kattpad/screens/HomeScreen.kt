@@ -27,6 +27,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -54,8 +56,7 @@ import kotlin.reflect.KSuspendFunction2
 import com.skythrew.kattpad.R
 
 @Composable
-fun HomeScreen(padding: PaddingValues, navController: NavController) {
-
+fun HomeScreen(padding: PaddingValues, navController: NavController, isLogging: Boolean, isLogged: Boolean) {
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -63,6 +64,29 @@ fun HomeScreen(padding: PaddingValues, navController: NavController) {
                 .fillMaxSize()
         ) {
             DiscoverySearchBar(navController)
+
+            if (!isLogged) {
+                Column (
+                    modifier = Modifier
+                        .weight(1F)
+                        .padding(50.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if (!isLogging) {
+                        Text(
+                            stringResource(id = R.string.login_text),
+                            fontWeight = FontWeight.Thin,
+                            textAlign = TextAlign.Center
+                        )
+                        TextButton(onClick = { navController.navigate(LoginScreen) }) {
+                            Text(stringResource(id = R.string.login))
+                        }
+                    } else {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         }
 }
 

@@ -20,4 +20,12 @@
     <string name="show">Afficher</string>
     <string name="replies">réponses</string>
     <string name="hide">Cacher</string>
+    <string name="login">Se connecter</string>
+    <string name="login_text">Connectez-vous à votre compte Wattpad pour accéder à toutes les fonctionnalités</string>
+    <string name="back">Retour</string>
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="password">Mot de passe</string>
+    <string name="login_short_text">Connectez-vous à Wattpad</string>
+    <string name="log_in">Connexion</string>
+    <string name="incorrect_credentials">Identifiants incorrects</string>
 </resources>
