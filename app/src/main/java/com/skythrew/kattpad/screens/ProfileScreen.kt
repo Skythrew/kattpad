@@ -144,6 +144,10 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
 fun StoriesRow(navController: NavController, user: User) {
     val pagerState = rememberPagerState(pageCount = { ceil(user.data.numStoriesPublished!!.toDouble() / 3).toInt() })
 
+    var cache: Map<Int, List<Story>> by remember {
+        mutableStateOf(mapOf())
+    }
+
     Text(stringResource(id = R.string.stories), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
 
     HorizontalPager(state = pagerState) {page ->
@@ -152,13 +156,18 @@ fun StoriesRow(navController: NavController, user: User) {
         }
 
         var isLoading by remember {
-            mutableStateOf(true)
+            mutableStateOf(false)
         }
 
         LaunchedEffect(key1 = page) {
-            isLoading = true
-            stories = user.fetchStories(setOf("title", "cover"), offset = page * 3, limit = 3)
-            isLoading = false
+            if (page !in cache) {
+                isLoading = true
+                stories = user.fetchStories(setOf("title", "cover"), offset = page * 3, limit = 3)
+                cache = cache.plus(mapOf(page to stories))
+                isLoading = false
+            } else {
+                stories = cache[page]!!
+            }
         }
 
         if (isLoading) {
