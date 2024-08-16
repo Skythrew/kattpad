@@ -37,6 +37,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,7 @@ import com.skythrew.kattpad.api.Comment
 import com.skythrew.kattpad.api.Part
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,11 +68,21 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
         navController.popBackStack(StoryScreen(storyId), inclusive = false)
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
     var isLoading by remember {
         mutableStateOf(true)
     }
 
     var part: Part? by remember {
+        mutableStateOf(null)
+    }
+
+    var voted: Boolean? by remember {
+        mutableStateOf(null)
+    }
+
+    var voteCount: Int? by remember {
         mutableStateOf(null)
     }
 
@@ -89,7 +101,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
     LaunchedEffect(key1 = id) {
         isLoading = true
 
-        part = client.fetchStoryPart(id, setOf("title", "group", "readCount", "voteCount", "commentCount"))
+        part = client.fetchStoryPart(id, setOf("title", "group", "readCount", "voteCount", "commentCount", "voted"))
         partText = part!!.fetchText()
 
         part!!.data.story!!.parts!!.forEachIndexed { index, storyPart ->
@@ -101,6 +113,9 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     nextPartId = part!!.data.story!!.parts!![index + 1].id
             }
         }
+
+        voted = part!!.data.voted
+        voteCount = part!!.data.voteCount
 
         isLoading = false
     }
@@ -127,7 +142,23 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                             horizontalArrangement = Arrangement.SpaceAround
                         ) {
                             NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.visibility), number = part?.data?.readCount)
-                            NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_favorite_24), number = part?.data?.voteCount)
+                            NumberIconButton(
+                                icon = when (voted) {
+                                    null, false -> ImageVector.vectorResource(R.drawable.outline_favorite_24)
+                                    true -> ImageVector.vectorResource(R.drawable.baseline_favorite_24)
+                                },
+                                onClick = {
+                                    if (voted != null)
+                                        coroutineScope.launch {
+                                            val req = part!!.toggleVote()
+                                            if (req != null) {
+                                                voted = part!!.data.voted
+                                                voteCount = req.votes
+                                            }
+                                        }
+                                },
+                                number = voteCount
+                            )
                             NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = part?.data?.commentCount, onClick = {showCommentsModal.value = true})
                         }
                     },
