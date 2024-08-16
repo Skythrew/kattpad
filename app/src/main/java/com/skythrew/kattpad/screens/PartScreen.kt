@@ -202,7 +202,8 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     item {
                         Text(
                             HtmlCompat.fromHtml(partText!!, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING).toString(),
-                            modifier = Modifier.padding(10.dp)
+                            modifier = Modifier.padding(10.dp),
+                            color = Color.Black
                         )
                     }
                 }
