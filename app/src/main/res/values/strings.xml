@@ -19,4 +19,12 @@
     <string name="show">Show</string>
     <string name="replies">replies</string>
     <string name="hide">Hide</string>
+    <string name="login">Log in</string>
+    <string name="login_text">Log in to your Wattpad account to have access to all features</string>
+    <string name="back">Back</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login_short_text">Log in to Wattpad</string>
+    <string name="log_in">Log in</string>
+    <string name="incorrect_credentials">Incorrect credentials</string>
 </resources>
