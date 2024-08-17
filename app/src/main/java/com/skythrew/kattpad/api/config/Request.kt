@@ -2,21 +2,26 @@ package com.skythrew.kattpad.api.config
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.compression.ContentEncoding
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 open class Request {
     private val client = HttpClient {
         install(HttpCookies)
-
+        install(ContentNegotiation) {
+            json()
+        }
         install(ContentEncoding) {
             deflate(1.0F)
             gzip(0.9F)
@@ -32,6 +37,10 @@ open class Request {
 
     val jsonDecoder = Json {
         ignoreUnknownKeys = true
+    }
+
+    suspend fun postAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
+        return client.post("${apis[api]}$path", options)
     }
 
     suspend fun simplePost(url: String, data: Parameters): HttpResponse {
