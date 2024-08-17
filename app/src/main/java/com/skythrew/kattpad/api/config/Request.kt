@@ -39,6 +39,10 @@ open class Request {
         ignoreUnknownKeys = true
     }
 
+    suspend fun getAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
+        return client.get("${apis[api]}$path", options)
+    }
+
     suspend fun postAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
         return client.post("${apis[api]}$path", options)
     }
