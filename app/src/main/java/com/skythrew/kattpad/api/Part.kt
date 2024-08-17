@@ -20,16 +20,17 @@ data class Part (
     private val client: Wattpad,
     val data: StoryPartData
 ) {
-    suspend fun fetchComments(fields: Set<String> = setOf(), limit: Int = 0): List<Comment> {
-        val commentsData = client.fetchObjData<CommentsResult>(
-            api = "v5",
-            path = "comments/namespaces/parts/resources/${data.id}/comments",
-            fields = fields,
-            limit = limit,
-            offset = 0
-        )
+    suspend fun fetchComments(limit: Int = 0, after: String? = null): Pair<Boolean, List<Comment>> {
+        val res = client.getAPI("v5", "comments/namespaces/parts/resources/${data.id}/comments") {
+            url {
+                parameters.append("limit", limit.toString())
+                if(after != null) parameters.append("after", after)
+            }
+        }
 
-        return commentsData.comments.map {data -> Comment(client, data)}
+        val commentsData = client.jsonDecoder.decodeFromString<CommentsResult>(res.bodyAsText())
+
+        return Pair(commentsData.pagination.after != null, commentsData.comments.map {data -> Comment(client, data)})
     }
 
     suspend fun fetchText(): String {
