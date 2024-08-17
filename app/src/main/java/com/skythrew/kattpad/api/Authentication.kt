@@ -4,6 +4,8 @@ import io.ktor.http.parameters
 import io.ktor.http.setCookie
 
 open class Authentication : com.skythrew.kattpad.api.config.Request() {
+    var username: String? = null
+
     var loggedIn = false
 
     suspend fun login(username: String, password: String) {
@@ -17,6 +19,7 @@ open class Authentication : com.skythrew.kattpad.api.config.Request() {
         for (cookie in cookies) {
             if (cookie.name == "token") {
                 loggedIn = true
+                this.username = username
                 break
             }
         }
