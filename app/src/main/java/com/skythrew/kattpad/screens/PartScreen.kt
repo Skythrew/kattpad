@@ -1,7 +1,9 @@
 package com.skythrew.kattpad.screens
 
 import android.text.format.DateFormat
+import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,10 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ButtonColors
@@ -31,6 +38,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -46,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +68,7 @@ import com.skythrew.kattpad.api.Comment
 import com.skythrew.kattpad.api.Part
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -98,6 +109,10 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
         mutableStateOf(null)
     }
 
+    val showModal = remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(key1 = id) {
         isLoading = true
 
@@ -128,10 +143,6 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
     else {
         val scrollBehaviour = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
-        val showCommentsModal = remember {
-            mutableStateOf(false)
-        }
-
         Scaffold (
             bottomBar = {
                 BottomAppBar (
@@ -159,7 +170,9 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                                 },
                                 number = voteCount
                             )
-                            NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = part?.data?.commentCount, onClick = {showCommentsModal.value = true})
+                            NumberIconButton(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = part?.data?.commentCount, onClick = {
+                                showModal.value = true
+                            })
                         }
                     },
                     scrollBehavior = scrollBehaviour
@@ -209,8 +222,8 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                 }
             }
 
-            if (showCommentsModal.value)
-                CommentsModal(navController = navController, part = part!!, showCommentsModal)
+            if (showModal.value)
+                CommentsModal(showModal = showModal, part = part!!, client = client, navController = navController)
         }
     }
 }
@@ -235,56 +248,139 @@ fun NumberIconButton(icon: ImageVector, number: Int?, contentDescription: String
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun CommentsModal(navController: NavController, part: Part, showModal: MutableState<Boolean>) {
-    var isLoading by remember {
+fun CommentsModal(showModal: MutableState<Boolean>, part: Part, client: Wattpad, navController: NavController) {
+    val modalState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val focusManager = LocalFocusManager.current
+
+    val lazyColState = rememberLazyListState()
+
+    var commentText by remember {
+        mutableStateOf("")
+    }
+
+    var commentSent by remember {
         mutableStateOf(true)
     }
 
-    var comments: List<Comment> by remember {
+    val commentsState: MutableState<List<Comment>> = remember {
         mutableStateOf(listOf())
     }
 
-    LaunchedEffect(key1 = part) {
-        isLoading = true
-        comments = part.fetchComments()
-        isLoading = false
+    val comments = commentsState.value
+
+    var commentsLeft by remember {
+        mutableStateOf(false)
     }
 
-    ModalBottomSheet(onDismissRequest = { showModal.value = false }) {
-        if (isLoading) {
-            Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
+    var after: String? by remember {
+        mutableStateOf(null)
+    }
+
+    var commentsLoading by remember {
+        mutableStateOf(false)
+    }
+
+    ModalBottomSheet(sheetState = modalState, onDismissRequest = { showModal.value = false }) {
+        LaunchedEffect(after) {
+            if (after == null)
+                commentsLoading = true
+
+            val (commentsAfter, fetchedComments) = part.fetchComments(after = after)
+            commentsLeft = commentsAfter
+            commentsState.value = comments.plus(fetchedComments)
+            commentsLoading = false
+        }
+
+        LaunchedEffect(lazyColState.canScrollForward) {
+            if(comments.isNotEmpty() && !lazyColState.canScrollForward && commentsLeft) {
+                after = comments.last().data.commentId.resourceId
             }
         }
-        else {
-            LazyColumn (
-              verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
+
+        if (commentsLoading)
+            CircularProgressIndicator()
+        else
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                state = lazyColState
             ) {
+                stickyHeader {
+                    TextField(
+                        value = commentText,
+                        enabled = client.loggedIn,
+                        onValueChange = { commentText = it },
+                        singleLine = false,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        label = {
+                            Text(stringResource(id = R.string.write_comment))
+                        },
+                        keyboardActions = KeyboardActions(onSend = {}),
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        val sentComment = part.comment(commentText)
+
+                                        if (sentComment != null) {
+                                            commentSent = true
+                                            commentsState.value = listOf(sentComment).plus(comments)
+                                            commentText = ""
+                                        } else {
+                                            commentSent = false
+                                        }
+                                    }
+
+                                    focusManager.clearFocus(force = true)
+                                }
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                            }
+                        },
+                        supportingText = {
+                            if (!commentSent)
+                                Text(stringResource(id = R.string.comment_error))
+                        },
+                        isError = !commentSent
+                    )
+                }
                 items(comments) {
-                    CommentRow(navController = navController, comment = it)
+                    CommentRow(navController = navController, comment = it, client = client, commentsState = commentsState)
                 }
             }
-        }
     }
 }
 
 @Composable
-fun CommentRow(navController: NavController, comment: Comment) {
+fun CommentRow(navController: NavController, comment: Comment, commentsState: MutableState<List<Comment>>, modifier: Modifier = Modifier, client: Wattpad) {
+    val coroutineScope = rememberCoroutineScope()
+
     var showReplies by remember {
         mutableStateOf(false)
     }
-    
+
     var repliesLoading by remember {
         mutableStateOf(true)
     }
-    
+
     var replies: List<Comment> by remember {
         mutableStateOf(listOf())
     }
-    
+
+    val showDeleteDialogState = remember {
+        mutableStateOf(false)
+    }
+
+    val deletionErrState = remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(key1 = showReplies) {
         if (showReplies && replies.isEmpty()) {
             repliesLoading = true
@@ -292,9 +388,9 @@ fun CommentRow(navController: NavController, comment: Comment) {
             repliesLoading = false
         }
     }
-    
+
     Row (
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Column {
@@ -329,21 +425,61 @@ fun CommentRow(navController: NavController, comment: Comment) {
                             Text("${when(showReplies) { true -> stringResource(id = R.string.hide) false -> stringResource(id = R.string.show)}} ${comment.data.replyCount} ${stringResource(id = R.string.replies)}")
                         }
                 }
-                Column {
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = comment.data.sentiments.like?.count)
+                    if (comment.data.user.username == client.username)
+                        IconButton(onClick = {
+                            showDeleteDialogState.value = true
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_icon))
+                        }
                 }
             }
+            if (deletionErrState.value)
+                Text(stringResource(id = R.string.comment_delete_err), color = MaterialTheme.colorScheme.error)
             if (showReplies) {
                 if (repliesLoading)
                     CircularProgressIndicator()
                 else {
-                    for (answer in replies) {
-                        CommentRow(navController = navController, comment = answer)
+                    for (reply in replies) {
+                        CommentRow(navController = navController, comment = reply, client = client, commentsState = commentsState)
                     }
                 }
             }
         }
     }
+
+    if (showDeleteDialogState.value)
+        DeleteCommentDialog(showDialogState = showDeleteDialogState, commentToDel = comment, errState = deletionErrState, commentsState = commentsState, coroutineScope)
+}
+
+@Composable
+fun DeleteCommentDialog(showDialogState: MutableState<Boolean>, commentToDel: Comment, errState: MutableState<Boolean>, commentsState: MutableState<List<Comment>>, coroutineScope: CoroutineScope) {
+    AlertDialog(onDismissRequest = { showDialogState.value = false },
+        confirmButton = {
+            TextButton(onClick = {
+                coroutineScope.launch {
+                    showDialogState.value = false
+                    val res = commentToDel.delete()
+
+                    Log.d("DELETE", res.toString())
+
+                    if (res != true) {
+                        errState.value = true
+                    }
+                    else {
+                        errState.value = false
+                        commentsState.value = commentsState.value.minus(commentToDel)
+                    }
+                }
+            }) {
+                Text(stringResource(id = R.string.delete))
+            }
+        },
+        text = {Text(stringResource(id = R.string.comment_deletion_confirm))}
+    )
 }
 
 @Serializable

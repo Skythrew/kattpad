@@ -27,4 +27,11 @@
     <string name="login_short_text">Log in to Wattpad</string>
     <string name="log_in">Log in</string>
     <string name="incorrect_credentials">Incorrect credentials</string>
+    <string name="write_comment">Write a comment</string>
+    <string name="comment_error">Comment couldn\'t be published</string>
+    <string name="comments">Comments</string>
+    <string name="delete_icon">Delete icon</string>
+    <string name="comment_deletion_confirm">Do you really want to delete your comment ?</string>
+    <string name="delete">Delete</string>
+    <string name="comment_delete_err">Couldn\'t delete this comment</string>
 </resources>

@@ -28,4 +28,11 @@
     <string name="login_short_text">Connectez-vous à Wattpad</string>
     <string name="log_in">Connexion</string>
     <string name="incorrect_credentials">Identifiants incorrects</string>
+    <string name="write_comment">Écrivez un commentaire</string>
+    <string name="comment_error">Le commentaire n\'a pas pu être publié</string>
+    <string name="comments">Commentaires</string>
+    <string name="delete_icon">Icône de suppression</string>
+    <string name="comment_deletion_confirm">Voulez-vous vraiment supprimer votre commentaire ?</string>
+    <string name="delete">Supprimer</string>
+    <string name="comment_delete_err">Le commentaire n\'a pas pu être supprimé</string>
 </resources>
