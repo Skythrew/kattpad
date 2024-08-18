@@ -301,7 +301,12 @@ fun CommentsModal(showModal: MutableState<Boolean>, part: Part, client: Wattpad,
         }
 
         if (commentsLoading)
-            CircularProgressIndicator()
+            Row (
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CircularProgressIndicator()
+            }
         else
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
