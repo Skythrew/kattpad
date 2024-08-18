@@ -6,10 +6,12 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -51,6 +53,14 @@ open class Request {
 
     suspend fun postAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
         return client.post("${apis[api]}$path", options)
+    }
+
+    suspend fun putAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
+        return client.put("${apis[api]}$path", options)
+    }
+
+    suspend fun deleteAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
+        return client.delete("${apis[api]}$path", options)
     }
 
     suspend fun simplePost(url: String, data: Parameters): HttpResponse {
