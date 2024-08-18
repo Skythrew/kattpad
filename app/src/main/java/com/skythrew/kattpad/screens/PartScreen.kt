@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -385,6 +386,14 @@ fun CommentRow(navController: NavController, comment: Comment, commentsState: Mu
         mutableStateOf(false)
     }
 
+    var commentLiked by remember {
+        mutableStateOf(comment.data.sentiments.like?.interaction != null)
+    }
+
+    var likeCount by remember {
+        mutableIntStateOf(comment.data.sentiments.like?.count ?: 0)
+    }
+
     LaunchedEffect(key1 = showReplies) {
         if (showReplies && replies.isEmpty()) {
             repliesLoading = true
@@ -432,7 +441,22 @@ fun CommentRow(navController: NavController, comment: Comment, commentsState: Mu
                 Column (
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    NumberIconButton(icon = ImageVector.vectorResource(id = R.drawable.outline_favorite_24), number = comment.data.sentiments.like?.count)
+                    NumberIconButton(icon = ImageVector.vectorResource(id = when (commentLiked) {true -> R.drawable.baseline_favorite_24 false -> R.drawable.outline_favorite_24}), number = likeCount) {
+                        if (client.loggedIn)
+                            coroutineScope.launch {
+                                if (commentLiked) {
+                                    if(comment.unlike() == true) {
+                                        commentLiked = false
+                                        likeCount -= 1
+                                    }
+                                } else {
+                                    if(comment.like() == true) {
+                                        commentLiked = true
+                                        likeCount += 1
+                                    }
+                                }
+                            }
+                    }
                     if (comment.data.user.username == client.username)
                         IconButton(onClick = {
                             showDeleteDialogState.value = true
