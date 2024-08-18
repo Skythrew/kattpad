@@ -1,7 +1,6 @@
 package com.skythrew.kattpad.screens
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -131,7 +130,6 @@ fun LoginScreen (padding: PaddingValues, navController: NavController, client: W
                     )
 
                     loggedIn = client.loggedIn
-                    Log.d("LOGIN", loggedIn.toString())
                     incorrectCredentials = client.loggedIn == false
 
                     if (client.loggedIn) {

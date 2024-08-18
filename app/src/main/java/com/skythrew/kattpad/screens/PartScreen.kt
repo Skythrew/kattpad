@@ -1,7 +1,6 @@
 package com.skythrew.kattpad.screens
 
 import android.text.format.DateFormat
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -463,8 +462,6 @@ fun DeleteCommentDialog(showDialogState: MutableState<Boolean>, commentToDel: Co
                 coroutineScope.launch {
                     showDialogState.value = false
                     val res = commentToDel.delete()
-
-                    Log.d("DELETE", res.toString())
 
                     if (res != true) {
                         errState.value = true
