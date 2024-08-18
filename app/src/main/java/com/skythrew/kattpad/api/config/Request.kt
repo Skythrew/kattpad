@@ -4,9 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
@@ -15,6 +17,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import java.util.Locale
 
 open class Request {
     private val client = HttpClient {
@@ -25,6 +28,9 @@ open class Request {
         install(ContentEncoding) {
             deflate(1.0F)
             gzip(0.9F)
+        }
+        defaultRequest {
+            header("Accept-Language", Locale.getDefault().toLanguageTag())
         }
     }
 
