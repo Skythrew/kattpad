@@ -5,8 +5,17 @@ import kotlinx.serialization.Serializable
 import java.util.*
 
 @Serializable
+data class CommentInteraction(
+    val resource: CommentResource,
+    val sentimentType: String,
+    @Serializable(with = DateSerializer::class) val created: Date,
+    val status: String
+)
+
+@Serializable
 data class CommentSentiment(
-    val count: Int
+    val count: Int,
+    val interaction: CommentInteraction? = null
 )
 
 @Serializable

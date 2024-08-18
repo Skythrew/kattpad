@@ -23,6 +23,24 @@ class Comment (
         return res.status == HttpStatusCode.OK
     }
 
+    suspend fun like(): Boolean? {
+        if (!client.loggedIn)
+            return null
+
+        val res = client.putAPI("v5", "comments/namespaces/comments/resources/${data.commentId.resourceId}/sentiments/:like:") {}
+
+        return res.status == HttpStatusCode.OK
+    }
+
+    suspend fun unlike(): Boolean? {
+        if (!client.loggedIn)
+            return null
+
+        val res = client.deleteAPI("v5", "comments/namespaces/comments/resources/${data.commentId.resourceId}/sentiments/:like:") {}
+
+        return res.status == HttpStatusCode.OK
+    }
+
     suspend fun fetchReplies(fields: Set<String> = setOf(), limit: Int = 0): List<Comment> {
         val repliesResult = client.fetchObjData<CommentsResult>(
             api = "v5",
