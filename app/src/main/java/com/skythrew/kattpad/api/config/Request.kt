@@ -3,7 +3,10 @@ package com.skythrew.kattpad.api.config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.ConstantCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.plugins.cookies.cookies
+import io.ktor.client.plugins.cookies.get
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
@@ -15,6 +18,7 @@ import io.ktor.client.request.put
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.Cookie
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
 import io.ktor.serialization.kotlinx.json.json
@@ -22,8 +26,7 @@ import kotlinx.serialization.json.Json
 import java.util.Locale
 
 open class Request {
-    private val client = HttpClient {
-        install(HttpCookies)
+    private var client = HttpClient {
         install(ContentNegotiation) {
             json()
         }
@@ -45,6 +48,28 @@ open class Request {
 
     val jsonDecoder = Json {
         ignoreUnknownKeys = true
+    }
+
+    suspend fun getToken(): String? {
+        return client.cookies("www.wattpad.com")["token"]?.value
+    }
+
+    fun updateHttpClient(cookie: String? = null) {
+        client = client.config {
+            install(HttpCookies) {
+                storage =
+                    if (cookie != null)
+                        ConstantCookiesStorage(
+                            Cookie(
+                                name = "token",
+                                value = cookie,
+                                domain = ".wattpad.com"
+                            )
+                        )
+                    else
+                        ConstantCookiesStorage()
+            }
+        }
     }
 
     suspend fun getAPI(api: String, path: String, options: HttpRequestBuilder.() -> Unit): HttpResponse {
