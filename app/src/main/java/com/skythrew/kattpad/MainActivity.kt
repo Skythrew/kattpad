@@ -50,13 +50,12 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(Unit) {
-                    val username = store.getString("username", null)
-                    val password = store.getString("password", null)
+                    val token = store.getString("token", null)
 
-                    if (username != null && password != null) {
+                    if (token != null) {
                         isLogging = true
 
-                        client.login(username, password)
+                        client.loginByCookie(token)
                         isLogged.value = client.loggedIn
 
                         isLogging = false

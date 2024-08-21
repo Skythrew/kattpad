@@ -138,8 +138,7 @@ fun LoginScreen (padding: PaddingValues, navController: NavController, client: W
                         navController.popBackStack()
 
                         store.edit {
-                            putString("username", username)
-                            putString("password", password)
+                            putString("token", client.getToken())
 
                             apply()
                         }
