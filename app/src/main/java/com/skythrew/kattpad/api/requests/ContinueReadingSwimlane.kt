@@ -46,5 +46,6 @@ data class ContinueReadingSwimlane(
 @Serializable
 data class ContinueReadingParsedData(
     val currentRead: List<SwimlaneItemData>,
-    val jumpBackIn: List<SwimlaneItemData>
+    val jumpBackIn: List<SwimlaneItemData>,
+    val updatedRecently: List<SwimlaneItemData>
 )
