@@ -1,33 +1,22 @@
 package com.skythrew.kattpad.api
 
-import com.skythrew.kattpad.api.requests.ContinueReadingParsedData
 import com.skythrew.kattpad.api.requests.ContinueReadingSwimlane
 import com.skythrew.kattpad.api.requests.ListData
 import com.skythrew.kattpad.api.requests.SearchResult
 import com.skythrew.kattpad.api.requests.StoriesSearchResult
 import com.skythrew.kattpad.api.requests.StoryData
 import com.skythrew.kattpad.api.requests.StoryPartData
-import com.skythrew.kattpad.api.requests.SwimlaneItemData
+import com.skythrew.kattpad.api.requests.SwimlaneItem
 import com.skythrew.kattpad.api.requests.UserData
 
 class Wattpad : Authentication() {
-    suspend fun fetchContinueReading(): ContinueReadingParsedData? {
+    suspend fun fetchContinueReading(): List<SwimlaneItem>? {
         if (!this.loggedIn)
             return null
 
         val continueReadingData = fetchObjData<ContinueReadingSwimlane>("v5", "home/section/continueReadingSwimlane", setOf())
 
-        val currentRead: MutableList<SwimlaneItemData> = mutableListOf()
-        val jumpBackIn: MutableList<SwimlaneItemData> = mutableListOf()
-
-        for (item in continueReadingData.data.items) {
-            if (item.type == "currentRead")
-                currentRead.addAll(item.data)
-            else if (item.type == "jumpBackIn")
-                jumpBackIn.addAll(item.data)
-        }
-
-        return ContinueReadingParsedData(currentRead, jumpBackIn)
+        return continueReadingData.data.items
     }
 
     suspend fun fetchList(id: Int, fields: Set<String> = setOf()): WattpadList {
