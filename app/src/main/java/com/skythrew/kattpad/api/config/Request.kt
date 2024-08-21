@@ -21,6 +21,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Cookie
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
+import io.ktor.http.decodeURLQueryComponent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.Locale
@@ -51,7 +52,7 @@ open class Request {
     }
 
     suspend fun getToken(): String? {
-        return client.cookies("www.wattpad.com")["token"]?.value
+        return client.cookies("www.wattpad.com")["token"]?.value?.decodeURLQueryComponent()
     }
 
     fun updateHttpClient(cookie: String? = null) {
