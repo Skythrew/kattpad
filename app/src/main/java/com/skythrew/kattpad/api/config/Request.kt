@@ -52,7 +52,7 @@ open class Request {
     }
 
     suspend fun getToken(): String? {
-        return client.cookies("www.wattpad.com")["token"]?.value?.decodeURLQueryComponent()
+        return client.cookies("https://www.wattpad.com")["token"]?.value?.decodeURLQueryComponent()
     }
 
     fun updateHttpClient(cookie: String? = null) {
