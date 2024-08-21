@@ -34,4 +34,10 @@
     <string name="comment_deletion_confirm">Do you really want to delete your comment ?</string>
     <string name="delete">Delete</string>
     <string name="comment_delete_err">Couldn\'t delete this comment</string>
+    <string name="chapters_left">chapters left</string>
+    <string name="new_chapter">new chapter</string>
+    <string name="new_chapters">new chapters</string>
+    <string name="your_stories">Your stories</string>
+    <string name="no_swimlane">No story found. It\'s time for you to read !</string>
+    <string name="chapter_left">chapter left</string>
 </resources>

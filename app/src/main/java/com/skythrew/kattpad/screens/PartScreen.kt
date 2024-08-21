@@ -76,7 +76,8 @@ import kotlinx.serialization.Serializable
 @Composable
 fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: Int) {
     BackHandler {
-        navController.popBackStack(StoryScreen(storyId), inclusive = false)
+        if(!navController.popBackStack(StoryScreen(storyId), inclusive = false))
+            navController.popBackStack()
     }
 
     val coroutineScope = rememberCoroutineScope()

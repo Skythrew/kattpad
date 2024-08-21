@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = HomeScreen) {
                         composable<HomeScreen> {
                             showBottomBar = true
-                            HomeScreen(padding = padding, navController = navController, isLogging = isLogging, isLogged = isLogged.value)
+                            HomeScreen(padding = padding, navController = navController, isLogging = isLogging, isLogged = isLogged.value, client = client)
                         }
 
                         composable<StoryScreen> {

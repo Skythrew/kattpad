@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SecondaryTabRow
@@ -48,20 +50,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.api.requests.SwimlaneItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KSuspendFunction2
-import com.skythrew.kattpad.R
 
 @Composable
-fun HomeScreen(padding: PaddingValues, navController: NavController, isLogging: Boolean, isLogged: Boolean) {
+fun HomeScreen(padding: PaddingValues, navController: NavController, client: Wattpad, isLogging: Boolean, isLogged: Boolean) {
         Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(bottom = padding.calculateBottomPadding())
-                .fillMaxSize()
+                .padding(bottom = padding.calculateBottomPadding()),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DiscoverySearchBar(navController)
 
@@ -86,8 +89,109 @@ fun HomeScreen(padding: PaddingValues, navController: NavController, isLogging: 
                         CircularProgressIndicator()
                     }
                 }
+            } else {
+                Column (modifier = Modifier.padding(horizontal = 10.dp)) {
+                    ReadingSwimlane(navController = navController, client = client)
+                }
             }
         }
+}
+
+@Composable
+fun ReadingSwimlane(navController: NavController, client: Wattpad) {
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+
+    var swimlaneItems: List<SwimlaneItem> by remember {
+        mutableStateOf(listOf())
+    }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        swimlaneItems = client.fetchContinueReading() ?: listOf()
+        isLoading = false
+    }
+
+    Column (
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            stringResource(R.string.your_stories),
+            fontSize = MaterialTheme.typography.headlineSmall.fontSize
+        )
+        if (isLoading)
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        else
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                swimlaneItems.forEach {item ->
+                    SwimlaneSection(navController = navController, item = item)
+                }
+
+                if (swimlaneItems.isEmpty())
+                    Text(
+                        stringResource(id = R.string.no_swimlane),
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize
+                    )
+            }
+    }
+}
+
+@Composable
+fun SwimlaneSection(navController: NavController, item: SwimlaneItem) {
+    val data = item.data[0]
+
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            item.heading,
+            fontWeight = FontWeight.Bold,
+            fontSize = MaterialTheme.typography.labelMedium.fontSize,
+            textAlign = TextAlign.Center
+        )
+
+        AsyncImage (
+            model = data.cover,
+            contentDescription = stringResource(R.string.cover),
+            modifier = Modifier
+                .clickable {
+                    navController.navigate(
+                        PartScreen(partId = data.currentPart.id, storyId = data.id)
+                    )
+                }
+                .width(80.dp)
+        )
+
+        LinearProgressIndicator(
+            progress = { data.currentPart.number.toFloat() / data.totalParts },
+            modifier = Modifier.width(75.dp)
+        )
+
+        Text(
+            text = when (data.newParts) {
+                0 -> "${data.totalParts - data.currentPart.number} ${
+                    when (data.totalParts - data.currentPart.number <= 1) {
+                        true -> stringResource(id = R.string.chapter_left)
+                        false -> stringResource(id = R.string.chapters_left)
+                    }
+                }"
+                1 -> "${data.newParts} ${stringResource(id = R.string.new_chapter)}"
+                else -> "${data.newParts} ${stringResource(id = R.string.new_chapters)}"
+            },
+            fontSize = MaterialTheme.typography.labelMedium.fontSize
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -200,32 +304,37 @@ fun DiscoverySearchBar(navController: NavController) {
         }
     }
 
-    SearchBar(
-        query = searchText,
-        onQueryChange = {
-            searchText = it
-        },
-        onSearch = {activeSearch = false},
-        active = activeSearch,
-        onActiveChange = {activeSearch = it},
-        placeholder = {
-            Text(
-                stringResource(id = R.string.discovery_placeholder)
-            )
-        },
-        trailingIcon = { Icon(
-            Icons.Default.Search,
-            contentDescription = null
-        )}
+    Row (
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
-            for (i in 0..<pagerState.pageCount) {
-                Tab(selected = pagerState.currentPage == i, onClick = { coroutineScope.launch { pagerState.animateScrollToPage(i) }}, text = {Text(tabs[i].title)})
+        SearchBar(
+            query = searchText,
+            onQueryChange = {
+                searchText = it
+            },
+            onSearch = {activeSearch = false},
+            active = activeSearch,
+            onActiveChange = {activeSearch = it},
+            placeholder = {
+                Text(
+                    stringResource(id = R.string.discovery_placeholder)
+                )
+            },
+            trailingIcon = { Icon(
+                Icons.Default.Search,
+                contentDescription = null
+            )}
+        ) {
+            SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                for (i in 0..<pagerState.pageCount) {
+                    Tab(selected = pagerState.currentPage == i, onClick = { coroutineScope.launch { pagerState.animateScrollToPage(i) }}, text = {Text(tabs[i].title)})
+                }
             }
-        }
 
-        HorizontalPager(state = pagerState) {
-            tabs[it].ShowContent(query = query)
+            HorizontalPager(state = pagerState) {
+                tabs[it].ShowContent(query = query)
+            }
         }
     }
 }

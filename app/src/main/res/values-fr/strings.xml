@@ -35,4 +35,10 @@
     <string name="comment_deletion_confirm">Voulez-vous vraiment supprimer votre commentaire ?</string>
     <string name="delete">Supprimer</string>
     <string name="comment_delete_err">Le commentaire n\'a pas pu être supprimé</string>
+    <string name="chapters_left">chapitres restants</string>
+    <string name="new_chapter">nouveau chapitre</string>
+    <string name="new_chapters">nouveaux chapitres</string>
+    <string name="your_stories">Vos histoires</string>
+    <string name="no_swimlane">Aucun résultat. Il est temps de lire !</string>
+    <string name="chapter_left">chapitre restant</string>
 </resources>
