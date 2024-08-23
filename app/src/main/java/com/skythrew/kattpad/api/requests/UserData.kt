@@ -43,5 +43,7 @@ data class UserData (
     @SerialName("verified_email") val verifiedEmail: Boolean? = null,
     val allowCrawler: Boolean? = null,
     val deeplink: String? = null,
-    val isMuted: Boolean? = null
+    val isMuted: Boolean? = null,
+    val follower: Boolean? = null,
+    val following: Boolean? = null
 )
