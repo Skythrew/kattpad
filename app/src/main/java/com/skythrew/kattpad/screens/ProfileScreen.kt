@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,13 +45,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.User
 import com.skythrew.kattpad.api.Wattpad
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
-import com.skythrew.kattpad.R
-import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(padding: PaddingValues, navController: NavController, client: Wattpad, username: String) {
@@ -127,12 +127,10 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                 if (client.loggedIn)
                     Button(onClick = {
                         coroutineScope.launch {
-                            val success: Boolean?;
-
-                            if (userFollowed!!)
-                                success = user!!.unfollow()
+                            val success: Boolean? = if (userFollowed!!)
+                                user!!.unfollow()
                             else
-                                success = user!!.follow()
+                                user!!.follow()
 
                             if (success == true)
                                 userFollowed = !userFollowed!!
@@ -222,34 +220,23 @@ fun StoriesRow(navController: NavController, user: User) {
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 for (story in stories) {
-                    Card(
-                        modifier = Modifier
-                            .clickable { navController.navigate(StoryScreen(story.data.id)) }
-                            .weight(1F)
+                    Column (
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.weight(1F)
                     ) {
-                        Column (
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            AsyncImage(
-                                model = story.data.cover,
-                                contentDescription = stringResource(id = R.string.cover),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .height(1.dp)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
-                            )
-                            Text(
-                                story.data.title!!,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 10.dp)
-                            )
-                        }
+                        AsyncImage(
+                            model = story.data.cover,
+                            contentDescription = stringResource(id = R.string.cover),
+                            modifier = Modifier.width(80.dp).height(125.dp).clickable { navController.navigate(StoryScreen(story.data.id)) }
+                        )
+                        Text(
+                            story.data.title!!,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 10.dp)
+                        )
                     }
                 }
                 for (i in 1..(3 - stories.count())) {
