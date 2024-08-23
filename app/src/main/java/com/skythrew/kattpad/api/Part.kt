@@ -14,6 +14,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.formUrlEncode
+import io.ktor.http.parameters
 import kotlinx.serialization.json.Json
 
 data class Part (
@@ -112,5 +114,20 @@ data class Part (
         }
         else
             return null
+    }
+
+    suspend fun syncReadingPosition(): Boolean? {
+        if (!client.loggedIn)
+            return null
+
+        val res =  client.postAPI("v2", "syncreadingposition") {
+            contentType(ContentType.Application.FormUrlEncoded)
+            setBody(parameters {
+                append("story_id", data.id!!.toString())
+                append("position", "1")
+            }.formUrlEncode())
+        }
+
+        return res.status == HttpStatusCode.OK
     }
 }
