@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.skythrew.kattpad.screens.HomeScreen
 import com.skythrew.kattpad.R
@@ -21,7 +22,7 @@ fun GenericNav(navController: NavController) {
 
         NavigationBarItem(
             selected = navBackStackEntry?.destination?.route == HomeScreen.javaClass.name,
-            onClick = { navController.navigate(HomeScreen) { popUpTo(0) } },
+            onClick = { navController.navigateOnce(HomeScreen) { popUpTo(0) } },
             icon = {
                 Icon(
                 Icons.Default.Home,
@@ -31,4 +32,9 @@ fun GenericNav(navController: NavController) {
             label = { Text(stringResource(id = R.string.home)) }
         )
     }
+}
+
+inline fun <reified T: Any> NavController.navigateOnce(route: T, noinline builder: NavOptionsBuilder.() -> Unit = {}) {
+    if (this.currentDestination!!.route?.startsWith(route.javaClass.name) == false)
+        this.navigate(route, builder = builder)
 }

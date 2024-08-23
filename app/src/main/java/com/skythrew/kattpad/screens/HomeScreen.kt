@@ -59,6 +59,7 @@ import coil.request.ImageRequest
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Library
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -88,7 +89,7 @@ fun HomeScreen(padding: PaddingValues, navController: NavController, client: Wat
                             fontWeight = FontWeight.Thin,
                             textAlign = TextAlign.Center
                         )
-                        TextButton(onClick = { navController.navigate(LoginScreen) }) {
+                        TextButton(onClick = { navController.navigateOnce(LoginScreen) }) {
                             Text(stringResource(id = R.string.login))
                         }
                     } else {
@@ -155,7 +156,7 @@ fun Library(navController: NavController, client: Wattpad) {
                                 .width(80.dp)
                                 .height(125.dp)
                                 .clickable {
-                                    navController.navigate(
+                                    navController.navigateOnce(
                                         PartScreen(partId = currentPartId, storyId = story.id)
                                     )
                                 }
@@ -221,7 +222,7 @@ fun DiscoverySearchBar(navController: NavController) {
                                 .padding(10.dp)
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.navigate(StoryScreen(it.data.id))
+                                    navController.navigateOnce(StoryScreen(it.data.id))
                                 }
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -253,7 +254,7 @@ fun DiscoverySearchBar(navController: NavController) {
             LazyColumn (modifier = Modifier.fillMaxSize()){
                 items(data) {
                     Box (modifier = Modifier.clickable {
-                        navController.navigate(
+                        navController.navigateOnce(
                             ProfileScreen(it.data.username)
                         )
                     }) {

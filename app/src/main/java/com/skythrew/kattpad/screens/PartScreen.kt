@@ -68,6 +68,7 @@ import com.skythrew.kattpad.api.Comment
 import com.skythrew.kattpad.api.Part
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
+import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -186,7 +187,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
             Column (modifier = Modifier.padding(padding)) {
                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     IconButton(enabled = prevPartId != null, onClick = {
-                        navController.navigate(PartScreen(partId = prevPartId!!, storyId = storyId))
+                        navController.navigateOnce(PartScreen(partId = prevPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -201,7 +202,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     )
 
                     IconButton(enabled = nextPartId != null, onClick = {
-                        navController.navigate(PartScreen(partId = nextPartId!!, storyId = storyId))
+                        navController.navigateOnce(PartScreen(partId = nextPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
@@ -417,7 +418,7 @@ fun CommentRow(navController: NavController, comment: Comment, commentsState: Mu
                 modifier = Modifier
                     .clip(CircleShape)
                     .height(40.dp)
-                    .clickable { navController.navigate(ProfileScreen(comment.data.user.username)) }
+                    .clickable { navController.navigateOnce(ProfileScreen(comment.data.user.username)) }
             )
         }
         Column (modifier = Modifier.weight(1F)){

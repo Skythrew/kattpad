@@ -49,6 +49,7 @@ import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.User
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
@@ -228,7 +229,7 @@ fun StoriesRow(navController: NavController, user: User) {
                         AsyncImage(
                             model = story.data.cover,
                             contentDescription = stringResource(id = R.string.cover),
-                            modifier = Modifier.width(80.dp).height(125.dp).clickable { navController.navigate(StoryScreen(story.data.id)) }
+                            modifier = Modifier.width(80.dp).height(125.dp).clickable { navController.navigateOnce(StoryScreen(story.data.id)) }
                         )
                         Text(
                             story.data.title!!,
@@ -291,7 +292,7 @@ fun FollowersRow(navController: NavController, user: User) {
                 verticalArrangement = Arrangement.spacedBy(5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable {
-                    navController.navigate(ProfileScreen(it.data.username))
+                    navController.navigateOnce(ProfileScreen(it.data.username))
                 }
             )
             {
@@ -352,7 +353,7 @@ fun FollowingRow(navController: NavController, user: User) {
                 verticalArrangement = Arrangement.spacedBy(5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable {
-                    navController.navigate(ProfileScreen(it.data.username))
+                    navController.navigateOnce(ProfileScreen(it.data.username))
                 }
             )
             {

@@ -46,6 +46,7 @@ import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.NumberInfo
+import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +98,7 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                         ))
                         Text(text = searchResult?.data?.title!!, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
-                            navController.navigate(ProfileScreen(searchResult!!.data.user.username))
+                            navController.navigateOnce(ProfileScreen(searchResult!!.data.user.username))
                         }) {
                             AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = stringResource(
                                 id = R.string.profile_picture
@@ -127,7 +128,7 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                                                 Box (modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable {
-                                                        navController.navigate(
+                                                        navController.navigateOnce(
                                                             PartScreen(
                                                                 partId = part.id!!,
                                                                 storyId = storyId
