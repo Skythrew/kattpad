@@ -133,6 +133,9 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
         voted = part!!.data.voted
         voteCount = part!!.data.voteCount
 
+        if (client.loggedIn)
+            coroutineScope.launch { part!!.syncReadingPosition() }
+
         isLoading = false
     }
 
