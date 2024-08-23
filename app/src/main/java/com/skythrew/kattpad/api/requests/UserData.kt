@@ -44,6 +44,6 @@ data class UserData (
     val allowCrawler: Boolean? = null,
     val deeplink: String? = null,
     val isMuted: Boolean? = null,
-    val follower: Boolean? = null,
-    val following: Boolean? = null
+    var follower: Boolean? = null,
+    var following: Boolean? = null
 )
