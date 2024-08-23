@@ -95,14 +95,14 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                         AsyncImage(model = searchResult?.data?.cover, contentDescription = stringResource(
                             id = R.string.cover
                         ))
-                        Text(text = searchResult?.data?.title!!, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
+                        Text(text = searchResult?.data?.title!!, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
                             navController.navigate(ProfileScreen(searchResult!!.data.user.username))
                         }) {
                             AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = stringResource(
                                 id = R.string.profile_picture
                             ))
-                            Text(searchResult?.data?.user?.username ?: "", fontWeight = FontWeight.Bold)
+                            Text(searchResult?.data?.user?.username ?: "", fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                             Button(onClick = { /*TODO*/ }) {
