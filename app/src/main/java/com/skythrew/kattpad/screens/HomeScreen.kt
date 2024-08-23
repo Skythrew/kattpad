@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Library
 import com.skythrew.kattpad.api.Wattpad
@@ -146,10 +149,11 @@ fun Library(navController: NavController, client: Wattpad) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage (
-                            model = story.cover,
+                            model = ImageRequest.Builder(LocalContext.current).data(story.cover).crossfade(true).build(),
                             contentDescription = stringResource(R.string.cover),
                             modifier = Modifier
                                 .width(80.dp)
+                                .height(125.dp)
                                 .clickable {
                                     navController.navigate(
                                         PartScreen(partId = currentPartId, storyId = story.id)
