@@ -1,6 +1,7 @@
 package com.skythrew.kattpad.api
 
 import com.skythrew.kattpad.api.requests.MinUserData
+import com.skythrew.kattpad.api.requests.UserData
 import io.ktor.client.request.cookie
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -44,7 +45,7 @@ open class Authentication : com.skythrew.kattpad.api.config.Request() {
         }
 
         if (loginResponse.status == HttpStatusCode.OK) {
-            val userData = this.jsonDecoder.decodeFromString<MinUserData>(loginResponse.bodyAsText())
+            val userData = this.jsonDecoder.decodeFromString<UserData>(loginResponse.bodyAsText())
 
             this.updateHttpClient(cookie)
 
