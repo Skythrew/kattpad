@@ -111,7 +111,7 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                     )
                     Text(
                         user?.data?.username!!,
-                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         fontWeight = FontWeight.Bold
                     )
                 }
