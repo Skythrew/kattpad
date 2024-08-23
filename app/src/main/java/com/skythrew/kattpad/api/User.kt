@@ -6,6 +6,7 @@ import com.skythrew.kattpad.api.requests.LibraryData
 import com.skythrew.kattpad.api.requests.ListsResult
 import com.skythrew.kattpad.api.requests.UserData
 import com.skythrew.kattpad.api.requests.UserStoriesResult
+import io.ktor.http.HttpStatusCode
 
 class User (
     private val client: Wattpad = Wattpad(),
@@ -39,5 +40,33 @@ class User (
 
     suspend fun fetchLibrary(fields: Set<String> = setOf()): LibraryData {
         return client.fetchObjData<LibraryData>("v3", "$userRequest/library", fields)
+    }
+
+    suspend fun follow(): Boolean? {
+        if (!client.loggedIn)
+            return null
+
+        val res = client.postAPI("v3", "users/${client.username}/following") {
+            url {
+                parameters.append("users", data.username)
+            }
+        }
+
+        if (res.status == HttpStatusCode.OK)
+            data.following = true
+
+        return res.status == HttpStatusCode.OK
+    }
+
+    suspend fun unfollow(): Boolean? {
+        if (!client.loggedIn)
+            return null
+
+        val res = client.deleteAPI("v3", "users/${client.username}/following/${data.username}") {}
+
+        if (res.status == HttpStatusCode.OK)
+            data.following = false
+
+        return res.status == HttpStatusCode.OK
     }
 }
