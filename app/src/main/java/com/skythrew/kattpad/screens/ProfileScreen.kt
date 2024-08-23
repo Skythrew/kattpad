@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,7 +63,7 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
 
     LaunchedEffect(key1 = username) {
         isLoading = true
-        user = client.fetchUser(username, setOf("username", "avatar", "numFollowers", "createDate", "numStoriesPublished"))
+        user = client.fetchUser(username, setOf("username", "avatar", "numFollowers", "createDate", "numStoriesPublished", "following"))
         isLoading = false
     }
 
@@ -114,15 +115,27 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                     fontWeight = FontWeight.Thin
                 )
 
-                Button(onClick = { /*TODO*/ }) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(Icons.Default.AddCircle, contentDescription = null)
-                        Text(stringResource(id = R.string.follow))
+                if (client.loggedIn)
+                    Button(onClick = { /*TODO*/ }) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                when (user!!.data.following!!) {
+                                    true -> Icons.Default.CheckCircle
+                                    false -> Icons.Default.AddCircle
+                                                              },
+                                contentDescription = null
+                            )
+                            Text(
+                                when (user!!.data.following!!) {
+                                    true -> stringResource(id = R.string.unfollow)
+                                    false -> stringResource(id = R.string.follow)
+                                }
+                            )
+                        }
                     }
-                }
             }
             HorizontalDivider()
             Column(

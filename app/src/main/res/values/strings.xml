@@ -41,4 +41,5 @@
     <string name="no_swimlane">No story found. It\'s time for you to read !</string>
     <string name="chapter_left">chapter left</string>
     <string name="Finished">Finished</string>
+    <string name="unfollow">Unfollow</string>
 </resources>

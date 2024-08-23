@@ -42,4 +42,5 @@
     <string name="no_swimlane">Aucun résultat. Il est temps de lire !</string>
     <string name="chapter_left">chapitre restant</string>
     <string name="Finished">Terminé</string>
+    <string name="unfollow">Ne plus suivre</string>
 </resources>
