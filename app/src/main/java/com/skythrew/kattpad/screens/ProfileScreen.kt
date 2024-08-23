@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +51,12 @@ import com.skythrew.kattpad.api.Wattpad
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
 import com.skythrew.kattpad.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(padding: PaddingValues, navController: NavController, client: Wattpad, username: String) {
+    val coroutineScope = rememberCoroutineScope()
+
     var isLoading by remember {
         mutableStateOf(true)
     }
@@ -61,9 +65,14 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
         mutableStateOf(null)
     }
 
+    var userFollowed: Boolean? by remember {
+        mutableStateOf(null)
+    }
+
     LaunchedEffect(key1 = username) {
         isLoading = true
         user = client.fetchUser(username, setOf("username", "avatar", "numFollowers", "createDate", "numStoriesPublished", "following"))
+        userFollowed = user!!.data.following
         isLoading = false
     }
 
@@ -116,20 +125,33 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
                 )
 
                 if (client.loggedIn)
-                    Button(onClick = { /*TODO*/ }) {
+                    Button(onClick = {
+                        coroutineScope.launch {
+                            val success: Boolean?;
+
+                            if (userFollowed!!)
+                                success = user!!.unfollow()
+                            else
+                                success = user!!.follow()
+
+                            if (success == true)
+                                userFollowed = !userFollowed!!
+                        }
+
+                    }) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Icon(
-                                when (user!!.data.following!!) {
+                                when (userFollowed!!) {
                                     true -> Icons.Default.CheckCircle
                                     false -> Icons.Default.AddCircle
                                                               },
                                 contentDescription = null
                             )
                             Text(
-                                when (user!!.data.following!!) {
+                                when (userFollowed!!) {
                                     true -> stringResource(id = R.string.unfollow)
                                     false -> stringResource(id = R.string.follow)
                                 }
