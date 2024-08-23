@@ -135,7 +135,8 @@ fun Library(navController: NavController, client: Wattpad) {
                 columns = GridCells.Adaptive(minSize = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(library!!.data.stories) {story ->
+                val sortedStories = library!!.data.stories.sortedByDescending { story -> story.numParts!! -  story.parts!!.indexOf(story.parts.find {data -> data.id == story.readingPosition!!.partId}) + 1}
+                items(sortedStories) {story ->
                     val currentPartId = story.readingPosition!!.partId
                     val currentPartNumber = story.parts!!.indexOf(story.parts.find {data -> data.id == currentPartId}) + 1
                     val chaptersLeft = story.numParts!! - currentPartNumber
