@@ -102,7 +102,7 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
             ) {
                 Row (
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     AsyncImage(
                         model = user!!.data.avatar,

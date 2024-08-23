@@ -259,7 +259,7 @@ fun DiscoverySearchBar(navController: NavController) {
                     }) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(10.dp)
@@ -271,7 +271,7 @@ fun DiscoverySearchBar(navController: NavController) {
                                     CircleShape
                                 )
                             )
-                            Text(it.data.username)
+                            Text(it.data.username, fontSize = MaterialTheme.typography.labelLarge.fontSize, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
