@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -51,8 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.skythrew.kattpad.R
+import com.skythrew.kattpad.api.Library
 import com.skythrew.kattpad.api.Wattpad
-import com.skythrew.kattpad.api.requests.SwimlaneItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -91,25 +94,25 @@ fun HomeScreen(padding: PaddingValues, navController: NavController, client: Wat
                 }
             } else {
                 Column (modifier = Modifier.padding(horizontal = 10.dp)) {
-                    ReadingSwimlane(navController = navController, client = client)
+                    Library(navController = navController, client = client)
                 }
             }
         }
 }
 
 @Composable
-fun ReadingSwimlane(navController: NavController, client: Wattpad) {
+fun Library(navController: NavController, client: Wattpad) {
     var isLoading by remember {
         mutableStateOf(true)
     }
 
-    var swimlaneItems: List<SwimlaneItem> by remember {
-        mutableStateOf(listOf())
+    var library: Library? by remember {
+        mutableStateOf(null)
     }
 
     LaunchedEffect(Unit) {
         isLoading = true
-        swimlaneItems = client.fetchContinueReading() ?: listOf()
+        library = client.fetchLibrary()
         isLoading = false
     }
 
@@ -128,69 +131,49 @@ fun ReadingSwimlane(navController: NavController, client: Wattpad) {
                 CircularProgressIndicator()
             }
         else
-            Row (
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 80.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                swimlaneItems.forEach {item ->
-                    SwimlaneSection(navController = navController, item = item)
-                }
+                items(library!!.data.stories) {story ->
+                    val currentPartId = story.readingPosition!!.partId
+                    val currentPartNumber = story.parts!!.indexOf(story.parts.find {data -> data.id == currentPartId}) + 1
+                    val chaptersLeft = story.numParts!! - currentPartNumber
 
-                if (swimlaneItems.isEmpty())
-                    Text(
-                        stringResource(id = R.string.no_swimlane),
-                        fontSize = MaterialTheme.typography.labelMedium.fontSize
-                    )
-            }
-    }
-}
+                    Column (
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AsyncImage (
+                            model = story.cover,
+                            contentDescription = stringResource(R.string.cover),
+                            modifier = Modifier
+                                .width(80.dp)
+                                .clickable {
+                                    navController.navigate(
+                                        PartScreen(partId = currentPartId, storyId = story.id)
+                                    )
+                                }
+                        )
 
-@Composable
-fun SwimlaneSection(navController: NavController, item: SwimlaneItem) {
-    val data = item.data[0]
+                        LinearProgressIndicator(
+                            progress = {currentPartNumber.toFloat() / story.numParts},
+                            modifier = Modifier
+                                .width(75.dp)
+                                .clip(CircleShape)
+                        )
 
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(
-            item.heading,
-            fontWeight = FontWeight.Bold,
-            fontSize = MaterialTheme.typography.labelMedium.fontSize,
-            textAlign = TextAlign.Center
-        )
-
-        AsyncImage (
-            model = data.cover,
-            contentDescription = stringResource(R.string.cover),
-            modifier = Modifier
-                .clickable {
-                    navController.navigate(
-                        PartScreen(partId = data.currentPart.id, storyId = data.id)
-                    )
-                }
-                .width(80.dp)
-        )
-
-        LinearProgressIndicator(
-            progress = { data.currentPart.number.toFloat() / data.totalParts },
-            modifier = Modifier.width(75.dp)
-        )
-
-        Text(
-            text = when (data.newParts) {
-                0 -> "${data.totalParts - data.currentPart.number} ${
-                    when (data.totalParts - data.currentPart.number <= 1) {
-                        true -> stringResource(id = R.string.chapter_left)
-                        false -> stringResource(id = R.string.chapters_left)
+                        Text(
+                            when (chaptersLeft) {
+                                0 -> stringResource(id = R.string.Finished)
+                                1 -> "1 ${stringResource(id = R.string.chapter_left)}"
+                                else -> "$chaptersLeft ${stringResource(id = R.string.chapters_left)}"
+                            },
+                            textAlign = TextAlign.Center
+                        )
                     }
-                }"
-                1 -> "${data.newParts} ${stringResource(id = R.string.new_chapter)}"
-                else -> "${data.newParts} ${stringResource(id = R.string.new_chapters)}"
-            },
-            fontSize = MaterialTheme.typography.labelMedium.fontSize
-        )
+                }
+            }
     }
 }
 
