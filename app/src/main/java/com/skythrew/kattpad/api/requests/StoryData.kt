@@ -5,6 +5,13 @@ import kotlinx.serialization.SerialName
 import java.util.*
 
 @Serializable
+data class StoryReadingPosition(
+    val partId: Int,
+    val position: Int,
+    @Serializable(with = DateSerializer::class) val lastReadDate: Date
+)
+
+@Serializable
 data class StoryLanguage(
     val id: Int,
     val name: String? = null
@@ -62,7 +69,10 @@ data class StoryData(
     val firstPublishedPart: StoryPartData? = null,
     val lastPublishedPart: StoryPartData? = null,
     val parts: List<StoryPartData>? = null,
-    val user: MinUserData
+    val user: MinUserData,
+    val deleted: Boolean? = null,
+    val readingPosition: StoryReadingPosition? = null,
+    @Serializable(with = DateSerializer::class) val dateAdded: Date? = null
 )
 
 @Serializable

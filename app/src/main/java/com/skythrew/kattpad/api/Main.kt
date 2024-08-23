@@ -1,22 +1,18 @@
 package com.skythrew.kattpad.api
 
-import com.skythrew.kattpad.api.requests.ContinueReadingSwimlane
 import com.skythrew.kattpad.api.requests.ListData
 import com.skythrew.kattpad.api.requests.SearchResult
 import com.skythrew.kattpad.api.requests.StoriesSearchResult
 import com.skythrew.kattpad.api.requests.StoryData
 import com.skythrew.kattpad.api.requests.StoryPartData
-import com.skythrew.kattpad.api.requests.SwimlaneItem
 import com.skythrew.kattpad.api.requests.UserData
 
 class Wattpad : Authentication() {
-    suspend fun fetchContinueReading(): List<SwimlaneItem>? {
+    suspend fun fetchLibrary(): Library? {
         if (!this.loggedIn)
             return null
 
-        val continueReadingData = fetchObjData<ContinueReadingSwimlane>("v5", "home/section/continueReadingSwimlane", setOf())
-
-        return continueReadingData.data.items
+        return Library(this, User(this, UserData(username = this.username!!)).fetchLibrary())
     }
 
     suspend fun fetchList(id: Int, fields: Set<String> = setOf()): WattpadList {

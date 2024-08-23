@@ -2,6 +2,7 @@ package com.skythrew.kattpad.api
 
 import com.skythrew.kattpad.api.requests.FollowersResult
 import com.skythrew.kattpad.api.requests.FollowingResult
+import com.skythrew.kattpad.api.requests.LibraryData
 import com.skythrew.kattpad.api.requests.ListsResult
 import com.skythrew.kattpad.api.requests.UserData
 import com.skythrew.kattpad.api.requests.UserStoriesResult
@@ -34,5 +35,9 @@ class User (
         val storiesResult = client.fetchObjData<UserStoriesResult>("v4", "$userRequest/stories/published", setOf("total", "stories(id,user,${fields.joinToString(",")})"), limit, offset)
 
         return storiesResult.stories.map {data -> Story(client, data) }
+    }
+
+    suspend fun fetchLibrary(fields: Set<String> = setOf()): LibraryData {
+        return client.fetchObjData<LibraryData>("v3", "$userRequest/library", fields)
     }
 }
