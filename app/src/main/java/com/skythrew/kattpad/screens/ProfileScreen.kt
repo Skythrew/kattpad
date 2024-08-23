@@ -234,6 +234,7 @@ fun StoriesRow(navController: NavController, user: User) {
                             story.data.title!!,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 10.dp)
                         )
