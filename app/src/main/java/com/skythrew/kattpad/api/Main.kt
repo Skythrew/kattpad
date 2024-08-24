@@ -1,6 +1,7 @@
 package com.skythrew.kattpad.api
 
 import com.skythrew.kattpad.api.requests.ListData
+import com.skythrew.kattpad.api.requests.NotificationResponse
 import com.skythrew.kattpad.api.requests.SearchResult
 import com.skythrew.kattpad.api.requests.StoriesSearchResult
 import com.skythrew.kattpad.api.requests.StoryData
@@ -19,6 +20,21 @@ class Wattpad : Authentication() {
         val listData = fetchObjData<ListData>("v3", "lists/$id", fields, 0, 0)
 
         return WattpadList(this, listData)
+    }
+
+    suspend fun fetchNotifications(fields: Set<String> = setOf(), limit: Int = 0, newestId: Long? = null): NotificationResponse? {
+        if (!this.loggedIn)
+            return null
+
+        val res = fetch<NotificationResponse>("v3", "users/${this.username}/notifications", mapOf(
+            "limit" to limit.toString(),
+            when{
+                newestId != null -> "newest_id" to newestId.toString()
+                else -> {"" to ""}
+            }
+        ))
+
+        return res
     }
 
     suspend fun fetchStory(id: Int, fields: Set<String> = setOf()): Story {
