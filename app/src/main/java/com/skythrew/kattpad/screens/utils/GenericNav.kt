@@ -2,6 +2,9 @@ package com.skythrew.kattpad.screens.utils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -12,11 +15,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.skythrew.kattpad.screens.HomeScreen
 import com.skythrew.kattpad.R
+import com.skythrew.kattpad.screens.HomeScreen
+import com.skythrew.kattpad.screens.NotificationScreen
 
 @Composable
-fun GenericNav(navController: NavController) {
+fun GenericNav(navController: NavController, notificationCount: Int? = null) {
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -31,6 +35,26 @@ fun GenericNav(navController: NavController) {
             },
             label = { Text(stringResource(id = R.string.home)) }
         )
+
+        if (notificationCount != null)
+            NavigationBarItem(
+                selected = navBackStackEntry?.destination?.route == NotificationScreen.javaClass.name,
+                onClick = { navController.navigateOnce(NotificationScreen) { popUpTo(0) } },
+                icon = {
+                    BadgedBox(badge = {
+                        if (notificationCount > 0)
+                            Badge {
+                                Text(notificationCount.toString())
+                            }
+                    }) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = ""
+                        )
+                    }
+                },
+                label = { Text("Notifications") }
+            )
     }
 }
 

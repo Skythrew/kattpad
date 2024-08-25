@@ -43,4 +43,9 @@
     <string name="chapter_left">chapitre restant</string>
     <string name="Finished">Terminé</string>
     <string name="unfollow">Ne plus suivre</string>
+    <string name="updated_story">a mis à jour</string>
+    <string name="commented_on">a commenté sur</string>
+    <string name="just_followed_you">vient de commencer à vous suivre</string>
+    <string name="replied_to_comment_on">a répondu à un commentaire sur</string>
+    <string name="posted_new_announcement">a publié une nouvelle annonce</string>
 </resources>

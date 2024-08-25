@@ -18,6 +18,7 @@ import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.data.createSharedPreferences
 import com.skythrew.kattpad.screens.HomeScreen
 import com.skythrew.kattpad.screens.LoginScreen
+import com.skythrew.kattpad.screens.NotificationScreen
 import com.skythrew.kattpad.screens.PartScreen
 import com.skythrew.kattpad.screens.ProfileScreen
 import com.skythrew.kattpad.screens.StoryScreen
@@ -49,6 +50,10 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(false)
                 }
 
+                var notificationCount: Int? by remember {
+                    mutableStateOf(null)
+                }
+
                 LaunchedEffect(Unit) {
                     val token = store.getString("token", null)
 
@@ -62,10 +67,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                LaunchedEffect(isLogged.value) {
+                    if (isLogged.value)
+                        notificationCount = client.fetchNotifications(setOf("unreadTotal"))?.unreadTotal
+                }
+
                 Scaffold (
                     bottomBar = { 
                         if (showBottomBar)
-                            GenericNav(navController = navController)
+                            GenericNav(navController = navController, notificationCount = notificationCount)
                     }
                 ){ padding ->
                     NavHost(navController = navController, startDestination = HomeScreen) {
@@ -102,6 +112,12 @@ class MainActivity : ComponentActivity() {
                             showBottomBar = false
 
                             LoginScreen(padding, navController, client, store, isLogged)
+                        }
+
+                        composable<NotificationScreen> {
+                            showBottomBar = true
+
+                            NotificationScreen(padding, navController, client)
                         }
                     }
                 }

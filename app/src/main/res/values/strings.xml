@@ -42,4 +42,9 @@
     <string name="chapter_left">chapter left</string>
     <string name="Finished">Finished</string>
     <string name="unfollow">Unfollow</string>
+    <string name="updated_story">updated</string>
+    <string name="commented_on">commented on</string>
+    <string name="just_followed_you">just followed you</string>
+    <string name="replied_to_comment_on">replied to a comment on</string>
+    <string name="posted_new_announcement">posted a new announcement</string>
 </resources>
