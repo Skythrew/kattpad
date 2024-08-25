@@ -7,6 +7,7 @@ import com.skythrew.kattpad.api.requests.StoriesSearchResult
 import com.skythrew.kattpad.api.requests.StoryData
 import com.skythrew.kattpad.api.requests.StoryPartData
 import com.skythrew.kattpad.api.requests.UserData
+import io.ktor.http.HttpStatusCode
 
 class Wattpad : Authentication() {
     suspend fun fetchLibrary(): Library? {
@@ -53,6 +54,15 @@ class Wattpad : Authentication() {
         val userData = fetchObjData<UserData>("v3", "users/$username", fields, 0, 0)
 
         return User(this, userData)
+    }
+
+    suspend fun markNotificationsAsRead(): Boolean? {
+        if (!this.loggedIn)
+            return null
+
+        val res = this.simpleGet("https://www.wattpad.com/notifications")
+
+        return res.status == HttpStatusCode.OK
     }
 
     suspend fun searchStory(title: String, offset: Int = 0): List<Story> {
