@@ -1,5 +1,7 @@
 package com.skythrew.kattpad.api.requests
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -7,31 +9,36 @@ import kotlinx.serialization.json.JsonNames
 import java.util.Date
 
 @Serializable
+@Parcelize
 data class ActionUrl(
     val deeplink: String? = null,
     val standard: String? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationImage(
     val url: String? = null,
     val callToActionUrl: ActionUrl? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationImages(
     val left: NotificationImage? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationStoryPartData(
     val id: Int? = null,
     val title: String? = null,
     val index: Int? = null,
     val url: String? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationStoryData(
     val id: Int? = null,
     val title: String? = null,
@@ -46,9 +53,10 @@ data class NotificationStoryData(
     val category1: String? = null,
     val category2: String? = null,
     val tag: String? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationCommentData(
     val id: String? = null,
     val body: String? = null,
@@ -56,9 +64,11 @@ data class NotificationCommentData(
     val parentId: String? = null,
     @SerialName("notification_instance_id") val notificationInstanceId: String? = null
 )
+) : Parcelable
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
+@Parcelize
 data class NotificationData(
     val comment: NotificationCommentData? = null,
     val story: NotificationStoryData? = null,
@@ -72,19 +82,21 @@ data class NotificationData(
 )
 
 @Serializable
+@Parcelize
 data class NotificationItem(
     val id: Long? = null,
     val type: String? = null,
     @Serializable(with = DateSerializer::class) val createDate: Date? = null,
     val data: NotificationData,
     val isRead: Boolean? = null
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 data class NotificationResponse(
     val feed: List<NotificationItem>? = null,
     val total: Int? = null,
     val hasMore: Boolean? = null,
     val unreadTotal: Int? = null,
     val nextUrl: String? = null
-)
+) : Parcelable
