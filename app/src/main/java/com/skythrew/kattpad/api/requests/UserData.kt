@@ -1,15 +1,19 @@
 package com.skythrew.kattpad.api.requests
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.json.JsonNames
 import java.util.Date
 
 @Serializable
+@Parcelize
 data class MinUserData (
     @SerialName("name") val username: String,
     val avatar: String? = null,
-    val fullname: String? = null
-)
+    @JsonNames("realname") val fullname: String? = null
+) : Parcelable
 
 @Serializable
 data class UserData (
