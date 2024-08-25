@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,10 +116,14 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
         mutableStateOf(false)
     }
 
+    var showPartsModal by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(key1 = id) {
         isLoading = true
 
-        part = client.fetchStoryPart(id, setOf("title", "group", "readCount", "voteCount", "commentCount", "voted"))
+        part = client.fetchStoryPart(id, setOf("title", "group", "readCount", "voteCount", "commentCount", "voted", "story(parts(id,title))"))
         partText = part!!.fetchText()
 
         part!!.data.story!!.parts!!.forEachIndexed { index, storyPart ->
@@ -196,11 +201,16 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                         )
                     }
 
-                    Text(
-                        text = part?.data?.title!!,
-                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box (
+                        modifier = Modifier.clickable { showPartsModal = true }.clip(CircleShape)
+                    ) {
+                        Text(
+                            text = part?.data?.title!!,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
 
                     IconButton(enabled = nextPartId != null, onClick = {
                         navController.popBackStack()
@@ -228,6 +238,29 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }
                 }
             }
+
+            if (showPartsModal)
+                ModalBottomSheet(onDismissRequest = { showPartsModal = false }) {
+                    LazyColumn {
+                        items(part!!.data.story!!.parts!!) {part ->
+                            Box (modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    navController.popBackStack()
+
+                                    navController.navigateOnce(
+                                        PartScreen(
+                                            partId = part.id!!,
+                                            storyId = storyId
+                                        )
+                                    )
+                                }
+                            ) {
+                                Text(part.title!!, modifier = Modifier.padding(10.dp), fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
 
             if (showModal.value)
                 CommentsModal(showModal = showModal, part = part!!, client = client, navController = navController)
