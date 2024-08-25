@@ -187,7 +187,8 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
             Column (modifier = Modifier.padding(padding)) {
                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     IconButton(enabled = prevPartId != null, onClick = {
-                        navController.navigateOnce(PartScreen(partId = prevPartId!!, storyId = storyId))
+                        navController.popBackStack()
+                        navController.navigate(PartScreen(partId = prevPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -202,7 +203,8 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     )
 
                     IconButton(enabled = nextPartId != null, onClick = {
-                        navController.navigateOnce(PartScreen(partId = nextPartId!!, storyId = storyId))
+                        navController.popBackStack()
+                        navController.navigate(PartScreen(partId = nextPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,

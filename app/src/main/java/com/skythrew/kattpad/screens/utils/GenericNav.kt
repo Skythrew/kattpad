@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.skythrew.kattpad.R
@@ -25,7 +26,7 @@ fun GenericNav(navController: NavController, notificationCount: Int? = null) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
 
         NavigationBarItem(
-            selected = navBackStackEntry?.destination?.route == HomeScreen.javaClass.name,
+            selected = navBackStackEntry?.destination?.hasRoute<HomeScreen>() ?: false,
             onClick = { navController.navigateOnce(HomeScreen) { popUpTo(0) } },
             icon = {
                 Icon(
@@ -38,7 +39,7 @@ fun GenericNav(navController: NavController, notificationCount: Int? = null) {
 
         if (notificationCount != null)
             NavigationBarItem(
-                selected = navBackStackEntry?.destination?.route == NotificationScreen.javaClass.name,
+                selected = navBackStackEntry?.destination?.hasRoute<NotificationScreen>() ?: false,
                 onClick = { navController.navigateOnce(NotificationScreen) { popUpTo(0) } },
                 icon = {
                     BadgedBox(badge = {
@@ -59,6 +60,6 @@ fun GenericNav(navController: NavController, notificationCount: Int? = null) {
 }
 
 inline fun <reified T: Any> NavController.navigateOnce(route: T, noinline builder: NavOptionsBuilder.() -> Unit = {}) {
-    if (this.currentDestination!!.route?.startsWith(route.javaClass.name) == false)
+    if (this.currentDestination?.hasRoute<T>() == false)
         this.navigate(route, builder = builder)
 }
