@@ -2,14 +2,22 @@ package com.skythrew.kattpad.api
 
 import com.skythrew.kattpad.api.requests.ListData
 import com.skythrew.kattpad.api.requests.NotificationResponse
-import com.skythrew.kattpad.api.requests.SearchResult
 import com.skythrew.kattpad.api.requests.StoriesSearchResult
 import com.skythrew.kattpad.api.requests.StoryData
 import com.skythrew.kattpad.api.requests.StoryPartData
 import com.skythrew.kattpad.api.requests.UserData
 import io.ktor.http.HttpStatusCode
 
+/**
+ * The Wattpad client
+ *
+ * This client should be used to fetch all the needed remote Wattpad data.
+ */
 class Wattpad : Authentication() {
+    /**
+     * Fetches the library of the current client user
+     * @return `Library` instance or `null` if the client is not logged in
+     */
     suspend fun fetchLibrary(): Library? {
         if (!this.loggedIn)
             return null
@@ -17,12 +25,27 @@ class Wattpad : Authentication() {
         return Library(this, User(this, UserData(username = this.username!!)).fetchLibrary())
     }
 
+    /**
+     * Fetches a reading list by its ID.
+     *
+     * @param id The reading list ID
+     * @param fields Request fields to fetch (defaults to all fields)
+     * @return `WattpadList` instance
+     */
     suspend fun fetchList(id: Int, fields: Set<String> = setOf()): WattpadList {
         val listData = fetchObjData<ListData>("v3", "lists/$id", fields, 0, 0)
 
         return WattpadList(this, listData)
     }
 
+    /**
+     * Fetches the logged user's notifications
+     *
+     * @param fields Request fields to fetch (defaults to all fields)
+     * @param limit The maximum number of notifications to fetch
+     * @param newestId The newest notification to fetch (acts as a kind of offset)
+     * @return `NotificationResponse` or `null` if the client is not logged in
+     */
     suspend fun fetchNotifications(fields: Set<String> = setOf(), limit: Int = 0, newestId: Long? = null): NotificationResponse? {
         if (!this.loggedIn)
             return null
@@ -38,24 +61,50 @@ class Wattpad : Authentication() {
         return res
     }
 
+    /**
+     * Fetches a story by its ID.
+     *
+     * @param id Story id
+     * @param fields Request fields to fetch (defaults to all fields)
+     * @return `Story` instance
+     */
     suspend fun fetchStory(id: Int, fields: Set<String> = setOf()): Story {
         val storyData = fetchObjData<StoryData>("v3", "stories/$id", setOf("id", "user").plus(fields), 0, 0)
 
         return Story(this, storyData)
     }
 
+    /**
+     * Fetches a story part by its ID.
+     *
+     * @param id Story part id
+     * @param fields Request fields to fetch (defaults to all fields)
+     * @return `Part` instance
+     */
     suspend fun fetchStoryPart(id: Int, fields: Set<String> = setOf()): Part {
         val storyPartData = fetchObjData<StoryPartData>("v4", "parts/$id", setOf("id", "text_url").plus(fields), 0, 0)
 
         return Part(this, storyPartData)
     }
 
+    /**
+     * Fetches a story part by its username.
+     *
+     * @param username Username
+     * @param fields Request fields to fetch (defaults to all fields)
+     * @return `User` instance
+     */
     suspend fun fetchUser(username: String, fields: Set<String> = setOf()): User {
         val userData = fetchObjData<UserData>("v3", "users/$username", fields, 0, 0)
 
         return User(this, userData)
     }
 
+    /**
+     * Mark all the notifications as read
+     *
+     * @return `true` if the request succeeds, `false` otherwise, `null` if the client is not logged in
+     */
     suspend fun markNotificationsAsRead(): Boolean? {
         if (!this.loggedIn)
             return null
@@ -65,9 +114,15 @@ class Wattpad : Authentication() {
         return res.status == HttpStatusCode.OK
     }
 
-    suspend fun searchStory(title: String, offset: Int = 0): List<Story> {
+    /**
+     * Searches for a story by a query
+     *
+     * @param query
+     * @param offset Search request offset
+     */
+    suspend fun searchStory(query: String, offset: Int = 0): List<Story> {
         val params = mapOf(
-            "query" to title,
+            "query" to query,
             "offset" to offset.toString()
         )
 
@@ -112,21 +167,20 @@ class Wattpad : Authentication() {
         }
     }
 
-    suspend fun searchUser(username: String, offset: Int = 0): List<User> {
+    /**
+     * Searches for a user by a query
+     *
+     * @param query
+     * @param offset Search request offset
+     */
+    suspend fun searchUser(query: String, offset: Int = 0): List<User> {
         val params = mapOf(
-            "query" to username,
+            "query" to query,
             "offset" to offset.toString()
         )
 
         val result = fetch<List<UserData>>("v4", "search/users/", params)
 
         return result.map { data -> User(this, data)}
-    }
-
-    suspend fun search(query: String): SearchResult {
-        val userSearch = searchUser(query)
-        val storySearch = searchStory(query)
-
-        return SearchResult(userSearch, storySearch)
     }
 }

@@ -18,10 +18,22 @@ import io.ktor.http.formUrlEncode
 import io.ktor.http.parameters
 import kotlinx.serialization.json.Json
 
+/**
+ * A class representing a story part.
+ *
+ * @property client The Wattpad client to use for requests
+ * @property data The story part data
+ */
 data class Part (
     private val client: Wattpad,
     val data: StoryPartData
 ) {
+    /**
+     * Fetches comments on the story part
+     *
+     * @param limit The maximum number of comments to fetch
+     * @param after A comment ID which is used to only fetch comments after the one with the given ID
+     */
     suspend fun fetchComments(limit: Int = 0, after: String? = null): Pair<Boolean, List<Comment>> {
         val res = client.getAPI("v5", "comments/namespaces/parts/resources/${data.id}/comments") {
             url {
@@ -35,6 +47,9 @@ data class Part (
         return Pair(commentsData.pagination.after != null, commentsData.comments.map {data -> Comment(client, data)})
     }
 
+    /**
+     * Fetches the text of the story part
+     */
     suspend fun fetchText(): String {
         if (data.textUrl == null)
             throw Exception("Cannot fetch part content if text_url field is not fetched")
@@ -42,6 +57,11 @@ data class Part (
         return client.simpleGet(data.textUrl.text).bodyAsText()
     }
 
+    /**
+     * Votes for the story part
+     *
+     * @return `VotePostData`, `null` if there's any error
+     */
     suspend fun vote(): VotePostData? {
         if (!client.loggedIn || data.story == null)
             return null
@@ -59,6 +79,11 @@ data class Part (
         }
     }
 
+    /**
+     * Deletes the vote for the story part
+     *
+     * @return `VotePostData`, `null` if there's any error
+     */
     suspend fun unvote(): VotePostData? {
         if (!client.loggedIn || data.story == null)
             return null
@@ -76,6 +101,11 @@ data class Part (
         }
     }
 
+    /**
+     * Votes for the story part if the user has not voted yet, deletes the vote otherwise
+     *
+     * @return `VotePostData`, `null` if there's any error
+     */
     suspend fun toggleVote(): VotePostData? {
         if (!client.loggedIn || data.story == null)
             return null
@@ -86,6 +116,12 @@ data class Part (
             vote()
     }
 
+    /**
+     * Comments on the story part
+     *
+     * @param text The comment text
+     * @return `Comment`, `null` if there's any error
+     */
     suspend fun comment(text: String): Comment? {
         if (!client.loggedIn)
             return null
@@ -116,6 +152,11 @@ data class Part (
             return null
     }
 
+    /**
+     * Marks the story part as the part currently being read by the user (eg. to calculate the number of chapters left)
+     *
+     * @return `true` if the request succeeds, `false` otherwise, `null` if the client is not logged in
+     */
     suspend fun syncReadingPosition(): Boolean? {
         if (!client.loggedIn)
             return null
