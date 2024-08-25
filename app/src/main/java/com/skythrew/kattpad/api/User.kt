@@ -60,7 +60,7 @@ class User (
      * @return A list of reading lists
      */
     suspend fun fetchLists(fields: Set<String> = setOf(), limit: Int = 0): List<WattpadList> {
-        val listsResult = client.fetchObjData<ListsResult>("v3", "$userRequest/lists", setOf("total", "lists(id,${fields.joinToString(",")})"), limit)
+        val listsResult = client.fetchObjData<ListsResult>("v3", "$userRequest/lists", setOf("total", "lists(id,${fields.joinToString(",")})"), limit, offset = 0)
 
         return listsResult.lists.map {data -> WattpadList(client, data) }
     }
@@ -88,7 +88,7 @@ class User (
      * @return A list of stories
      */
     suspend fun fetchLibrary(fields: Set<String> = setOf()): LibraryData {
-        return client.fetchObjData<LibraryData>("v3", "$userRequest/library", fields)
+        return client.fetchObjData<LibraryData>("v3", "$userRequest/library", fields, limit = 0, offset = 0)
     }
 
     /**
