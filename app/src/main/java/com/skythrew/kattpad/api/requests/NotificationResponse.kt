@@ -63,7 +63,22 @@ data class NotificationCommentData(
     val user: MinUserData? = null,
     val parentId: String? = null,
     @SerialName("notification_instance_id") val notificationInstanceId: String? = null
-)
+) : Parcelable
+
+@Serializable
+@Parcelize
+data class NotificationUserMessageData(
+    val id: Long? = null,
+    val body: String? = null,
+    @Serializable(with = DateSerializer::class) val createDate: Date? = null,
+    val from: MinUserData? = null,
+    val to: MinUserData? = null,
+    val numReplies: Int? = null,
+    val isReply: Boolean? = null,
+    val isOffensive: Boolean? = null,
+    val latestReplies: List<NotificationUserMessageData>? = null,
+    val parentId: Long? = null,
+    val wasBroadcast: Boolean? = null
 ) : Parcelable
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -78,8 +93,11 @@ data class NotificationData(
     val body: String? = null,
     val images: NotificationImages? = null,
     val callToActionUrl: ActionUrl? = null,
-    @SerialName("notification_instance_id") val notificationInstanceId: String? = null
-)
+    @SerialName("notification_instance_id") val notificationInstanceId: String? = null,
+    val followed: MinUserData? = null,
+    val follower: MinUserData? = null,
+    val message: NotificationUserMessageData? = null
+) : Parcelable
 
 @Serializable
 @Parcelize
