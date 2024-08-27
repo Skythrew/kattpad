@@ -47,4 +47,14 @@
     <string name="just_followed_you">just followed you</string>
     <string name="replied_to_comment_on">replied to a comment on</string>
     <string name="posted_new_announcement">posted a new announcement</string>
+    <string name="reading_lists">Reading lists</string>
+    <string name="reading_list">Reading list</string>
+    <string name="story">Story</string>
+    <string name="follower">Follower</string>
+    <string name="followed">Followed</string>
+    <string name="followed_single">Followed</string>
+    <string name="infos">Informations</string>
+    <string name="description">Description</string>
+    <string name="location">Location</string>
+    <string name="registration">Registration</string>
 </resources>

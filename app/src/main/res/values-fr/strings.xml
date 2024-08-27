@@ -48,4 +48,14 @@
     <string name="just_followed_you">vient de commencer à vous suivre</string>
     <string name="replied_to_comment_on">a répondu à un commentaire sur</string>
     <string name="posted_new_announcement">a publié une nouvelle annonce</string>
+    <string name="reading_lists">Listes de lecture</string>
+    <string name="reading_list">Liste de lecture</string>
+    <string name="story">Histoire</string>
+    <string name="follower">Abonné</string>
+    <string name="followed_single">Suivi</string>
+    <string name="followed">Suivis</string>
+    <string name="infos">Informations</string>
+    <string name="description">Description</string>
+    <string name="location">Localisation</string>
+    <string name="registration">Inscription</string>
 </resources>

@@ -3,30 +3,35 @@ package com.skythrew.kattpad.screens
 import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,26 +42,33 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.text.HtmlCompat
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.User
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.screens.utils.ProfilePicture
+import com.skythrew.kattpad.screens.utils.StoryElement
 import com.skythrew.kattpad.screens.utils.navigateOnce
+import com.skythrew.kattpad.screens.utils.popBackOnce
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
+import kotlin.reflect.KSuspendFunction3
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(padding: PaddingValues, navController: NavController, client: Wattpad, username: String) {
+fun ProfileScreen(navController: NavController, client: Wattpad, username: String) {
     val coroutineScope = rememberCoroutineScope()
+
+    val scrollState = rememberScrollState()
 
     var isLoading by remember {
         mutableStateOf(true)
@@ -70,107 +82,171 @@ fun ProfileScreen(padding: PaddingValues, navController: NavController, client: 
         mutableStateOf(null)
     }
 
+    var showInfoModal: Boolean by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(key1 = username) {
         isLoading = true
-        user = client.fetchUser(username, setOf("username", "avatar", "numFollowers", "createDate", "numStoriesPublished", "following"))
+        user = client.fetchUser(username, setOf("username", "name", "avatar", "location", "numFollowers", "createDate", "numStoriesPublished", "numLists", "numFollowing", "following", "description", "location"))
         userFollowed = user!!.data.following
         isLoading = false
     }
 
-    if (isLoading) {
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator()
-        }
-    } else {
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    AsyncImage(
-                        model = user!!.data.avatar,
-                        contentDescription = stringResource(id = R.string.profile_picture),
-                        modifier = Modifier.clip(CircleShape)
-                    )
-                    Text(
-                        user?.data?.username!!,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Text(
-                    "${stringResource(id = R.string.joined_on)} ${
-                        DateFormat.getDateFormat(
-                            LocalContext.current
-                        ).format(user?.data?.createDate!!)
-                    }",
-                    fontWeight = FontWeight.Thin
-                )
-
-                if (client.loggedIn)
-                    Button(onClick = {
-                        coroutineScope.launch {
-                            val success: Boolean? = if (userFollowed!!)
-                                user!!.unfollow()
-                            else
-                                user!!.follow()
-
-                            if (success == true)
-                                userFollowed = !userFollowed!!
-                        }
-
-                    }) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                when (userFollowed!!) {
-                                    true -> Icons.Default.CheckCircle
-                                    false -> Icons.Default.AddCircle
-                                                              },
-                                contentDescription = null
-                            )
-                            Text(
-                                when (userFollowed!!) {
-                                    true -> stringResource(id = R.string.unfollow)
-                                    false -> stringResource(id = R.string.follow)
-                                }
-                            )
-                        }
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackOnce() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
-            }
-            HorizontalDivider()
-            Column(
+                },
+                title = {
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ProfilePicture(
+                            url = when(isLoading) {true -> "" false -> user!!.data.avatar!!}
+                        )
+
+                        Text(
+                            username,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                actions = {
+                    if (client.loggedIn && client.username != username)
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                val success: Boolean? = if (userFollowed!!)
+                                    user!!.unfollow()
+                                else
+                                    user!!.follow()
+
+                                if (success == true)
+                                    userFollowed = !userFollowed!!
+                            }
+                        }) {
+                            Icon(when(userFollowed) {true -> ImageVector.vectorResource(id = R.drawable.baseline_notifications_active_24) else -> Icons.Outlined.Notifications}, contentDescription = "")
+                        }
+
+                    IconButton(onClick = { showInfoModal = true }) {
+                        Icon(Icons.Outlined.Info, contentDescription = stringResource(id = R.string.infos))
+                    }
+                }
+            )
+        }
+    ) {padding ->
+        if (isLoading) {
+            Column (
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-                    .weight(4F),
+                    .fillMaxSize()
+                    .padding(padding),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                StoriesRow(navController = navController, user = user!!)
-                FollowersRow(navController = navController, user = user!!)
-                FollowingRow(navController = navController, user = user!!)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    if (user!!.data.numStoriesPublished!! > 0)
+                        StoriesRow(navController = navController, user = user!!)
+
+                    if (user!!.data.numFollowers!! > 0)
+                        UsersRow(
+                            navController = navController,
+                            request = user!!::fetchFollowers,
+                            title = stringResource(id = R.string.followers),
+                            maxCount = user!!.data.numFollowers!!
+                        )
+
+                    if (user!!.data.numFollowing!! > 0)
+                        UsersRow(
+                            navController = navController,
+                            request = user!!::fetchFollowing,
+                            title = stringResource(id = R.string.following),
+                            maxCount = user!!.data.numFollowing!!
+                        )
+                }
             }
         }
+    }
+
+    if (showInfoModal)
+        ModalBottomSheet(onDismissRequest = { showInfoModal = false }) {
+            if (!isLoading)
+                Column (
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+
+                    InfoModalSection(
+                        condition = user!!.data.description!!.isNotBlank(),
+                        divider = true,
+                        icon = {Icon(ImageVector.vectorResource(id = R.drawable.baseline_description_24), contentDescription = stringResource(id = R.string.description))},
+                        label = stringResource(id = R.string.description)
+                    ) {
+                        Text(HtmlCompat.fromHtml(user!!.data.description!!, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING).toString())
+                    }
+
+                    InfoModalSection(
+                        condition = user!!.data.location!!.isNotBlank(),
+                        divider = true,
+                        icon = {Icon(Icons.Filled.LocationOn, contentDescription = stringResource(id = R.string.location))},
+                        label = stringResource(id = R.string.location)
+                    ) {
+                        Text(user!!.data.location!!)
+                    }
+
+                    InfoModalSection(
+                        divider = false,
+                        icon = {Icon(Icons.Filled.CheckCircle, contentDescription = stringResource(id = R.string.registration))},
+                        label = stringResource(id = R.string.registration)
+                    ) {
+                        Text("${stringResource(id = R.string.joined_on)} ${DateFormat.getDateFormat(LocalContext.current).format(user!!.data.createDate!!)}")
+                    }
+                }
+        }
+}
+
+@Composable
+fun InfoModalSection(condition: Boolean = true, divider: Boolean, icon: @Composable () -> Unit = {}, label: String, content: @Composable () -> Unit = {}) {
+    if (condition) {
+        Column (
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row (
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icon()
+                Text(
+                    label,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            content()
+        }
+
+        if (divider)
+            HorizontalDivider()
     }
 }
 
@@ -182,7 +258,11 @@ fun StoriesRow(navController: NavController, user: User) {
         mutableStateOf(mapOf())
     }
 
-    Text(stringResource(id = R.string.stories), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+    Text(
+        stringResource(id = R.string.stories),
+        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
 
     HorizontalPager(state = pagerState) {page ->
         var stories: List<Story> by remember {
@@ -218,31 +298,14 @@ fun StoriesRow(navController: NavController, user: User) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 for (story in stories) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.weight(1F)
-                    ) {
-                        AsyncImage(
-                            model = story.data.cover,
-                            contentDescription = stringResource(id = R.string.cover),
-                            modifier = Modifier.width(80.dp).height(125.dp).clickable { navController.navigateOnce(StoryScreen(story.data.id)) }
-                        )
-                        Text(
-                            story.data.title!!,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 10.dp)
-                        )
-                    }
-                }
-                for (i in 1..(3 - stories.count())) {
-                    Box (modifier = Modifier.weight(1F))
+                    StoryElement(
+                        coverUrl = story.data.cover!!,
+                        text = story.data.title!!,
+                        onClick = { navController.navigateOnce(StoryScreen(story.data.id)) }
+                    )
                 }
             }
         }
@@ -250,14 +313,19 @@ fun StoriesRow(navController: NavController, user: User) {
 }
 
 @Composable
-fun FollowersRow(navController: NavController, user: User) {
+fun UsersRow(
+    navController: NavController,
+    request: KSuspendFunction3<Set<String>, Int, Int, List<User>>,
+    title: String,
+    maxCount: Int
+) {
     val lazyRowState = rememberLazyListState()
 
     var offset by remember {
         mutableIntStateOf(0)
     }
 
-    var followers: List<User> by remember {
+    var fetchedUsers: List<User> by remember {
         mutableStateOf(listOf())
     }
 
@@ -268,26 +336,31 @@ fun FollowersRow(navController: NavController, user: User) {
     LaunchedEffect(key1 = lazyRowState.canScrollForward) {
         if (!lazyRowState.canScrollForward &&
             lazyRowState.canScrollBackward &&
-            followers.count() < user.data.numFollowers!!
+            fetchedUsers.count() < maxCount
         )
             offset += 10
     }
 
     LaunchedEffect(key1 = offset) {
         isLoading = true
-        followers = followers.plus(user.fetchFollowers(setOf("username", "avatar"), offset=offset))
+        fetchedUsers = fetchedUsers.plus(request(setOf("username", "avatar"), 0, offset))
         isLoading = false
     }
 
-    Text(stringResource(id = R.string.followers), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
+    Text(
+        title,
+        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
 
     LazyRow (
         state = lazyRowState,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp)
     )
     {
-        items(followers) {
+        items(fetchedUsers) {
             Column (
                 verticalArrangement = Arrangement.spacedBy(5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -296,75 +369,10 @@ fun FollowersRow(navController: NavController, user: User) {
                 }
             )
             {
-                AsyncImage(
-                    model = it.data.avatar,
-                    contentDescription = stringResource(id = R.string.profile_picture),
-                    modifier = Modifier.clip(CircleShape)
-                )
+                ProfilePicture(url = it.data.avatar!!)
                 Text(
                     it.data.username,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FollowingRow(navController: NavController, user: User) {
-    val lazyRowState = rememberLazyListState()
-
-    var offset by remember {
-        mutableIntStateOf(0)
-    }
-
-    var following: List<User> by remember {
-        mutableStateOf(listOf())
-    }
-
-    var isLoading by remember {
-        mutableStateOf(true)
-    }
-
-    LaunchedEffect(key1 = lazyRowState.canScrollForward) {
-        if (!lazyRowState.canScrollForward &&
-            lazyRowState.canScrollBackward &&
-            following.count() < user.data.numFollowers!!
-        )
-            offset += 10
-    }
-
-    LaunchedEffect(key1 = offset) {
-        isLoading = true
-        following = following.plus(user.fetchFollowing(setOf("username", "avatar"), offset=offset))
-        isLoading = false
-    }
-
-    Text(stringResource(id = R.string.following), fontSize = MaterialTheme.typography.headlineSmall.fontSize, fontWeight = FontWeight.Bold)
-
-    LazyRow (
-        state = lazyRowState,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    )
-    {
-        items(following) {
-            Column (
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable {
-                    navController.navigateOnce(ProfileScreen(it.data.username))
-                }
-            )
-            {
-                AsyncImage(
-                    model = it.data.avatar,
-                    contentDescription = stringResource(id = R.string.profile_picture),
-                    modifier = Modifier.clip(CircleShape)
-                )
-                Text(
-                    it.data.username,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    fontSize = MaterialTheme.typography.labelMedium.fontSize
                 )
             }
         }

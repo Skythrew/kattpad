@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
 
                             val args = it.toRoute<ProfileScreen>()
 
-                            ProfileScreen(navController = navController, padding = padding, client = client, username = args.username)
+                            ProfileScreen(navController = navController, client = client, username = args.username)
                         }
 
                         composable<LoginScreen> {
