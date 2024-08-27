@@ -1,6 +1,5 @@
 package com.skythrew.kattpad.screens.utils
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
