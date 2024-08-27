@@ -69,6 +69,7 @@ import com.skythrew.kattpad.api.Comment
 import com.skythrew.kattpad.api.Part
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
+import com.skythrew.kattpad.screens.utils.navReplace
 import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -192,8 +193,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
             Column (modifier = Modifier.padding(padding)) {
                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     IconButton(enabled = prevPartId != null, onClick = {
-                        navController.popBackStack()
-                        navController.navigate(PartScreen(partId = prevPartId!!, storyId = storyId))
+                        navController.navReplace(PartScreen(partId = prevPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -213,8 +213,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }
 
                     IconButton(enabled = nextPartId != null, onClick = {
-                        navController.popBackStack()
-                        navController.navigate(PartScreen(partId = nextPartId!!, storyId = storyId))
+                        navController.navReplace(PartScreen(partId = nextPartId!!, storyId = storyId))
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
@@ -246,9 +245,7 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                             Box (modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.popBackStack()
-
-                                    navController.navigateOnce(
+                                    navController.navReplace(
                                         PartScreen(
                                             partId = part.id!!,
                                             storyId = storyId
