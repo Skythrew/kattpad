@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -19,14 +17,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SecondaryTabRow
@@ -45,19 +41,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Library
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.screens.utils.ProfilePicture
+import com.skythrew.kattpad.screens.utils.StoryElement
+import com.skythrew.kattpad.screens.utils.StoryPicture
 import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -72,7 +67,7 @@ fun HomeScreen(padding: PaddingValues, navController: NavController, client: Wat
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DiscoverySearchBar(navController)
+            DiscoverySearchBar(navController, client)
 
             if (!isLogged) {
                 Column (
@@ -144,39 +139,20 @@ fun Library(navController: NavController, client: Wattpad) {
                     val currentPartNumber = story.parts!!.indexOf(story.parts.find {data -> data.id == currentPartId}) + 1
                     val chaptersLeft = story.numParts!! - currentPartNumber
 
-                    Column (
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AsyncImage (
-                            model = ImageRequest.Builder(LocalContext.current).data(story.cover).crossfade(true).build(),
-                            contentDescription = stringResource(R.string.cover),
-                            modifier = Modifier
-                                .width(80.dp)
-                                .height(125.dp)
-                                .clickable {
-                                    navController.navigateOnce(
-                                        PartScreen(partId = currentPartId, storyId = story.id)
-                                    )
-                                }
-                        )
-
-                        LinearProgressIndicator(
-                            progress = {currentPartNumber.toFloat() / story.numParts},
-                            modifier = Modifier
-                                .width(75.dp)
-                                .clip(CircleShape)
-                        )
-
-                        Text(
-                            when (chaptersLeft) {
-                                0 -> stringResource(id = R.string.Finished)
-                                1 -> "1 ${stringResource(id = R.string.chapter_left)}"
-                                else -> "$chaptersLeft ${stringResource(id = R.string.chapters_left)}"
-                            },
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    StoryElement(
+                        coverUrl = story.cover!!,
+                        text = when (chaptersLeft) {
+                            0 -> stringResource(id = R.string.Finished)
+                            1 -> "1 ${stringResource(id = R.string.chapter_left)}"
+                            else -> "$chaptersLeft ${stringResource(id = R.string.chapters_left)}"
+                        },
+                        progress = {currentPartNumber.toFloat() / story.numParts},
+                        onClick = {
+                            navController.navigateOnce(
+                                PartScreen(partId = currentPartId, storyId = story.id)
+                            )
+                        }
+                    )
                 }
             }
     }
@@ -184,7 +160,7 @@ fun Library(navController: NavController, client: Wattpad) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoverySearchBar(navController: NavController) {
+fun DiscoverySearchBar(navController: NavController, client: Wattpad) {
     val coroutineScope = rememberCoroutineScope()
 
     var activeSearch by rememberSaveable {
@@ -198,8 +174,6 @@ fun DiscoverySearchBar(navController: NavController) {
     var query by rememberSaveable {
         mutableStateOf("")
     }
-
-    val client = Wattpad()
 
     val tabs = listOf(
         SearchTab(stringResource(id = R.string.stories), client::searchStory) { data, offset ->
@@ -225,19 +199,18 @@ fun DiscoverySearchBar(navController: NavController) {
                                 }
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                AsyncImage(model = it.data.cover, contentDescription = stringResource(
-                                    id = R.string.cover
-                                ))
+                                StoryPicture(url = it.data.cover!!)
+
                                 Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                     Text(
                                         text = it.data.title!!,
-                                        fontWeight = FontWeight.Bold,
                                         fontSize = MaterialTheme.typography.headlineSmall.fontSize,
                                         overflow = TextOverflow.Ellipsis,
                                         maxLines = 1
                                     )
                                     Text(
                                         text = it.data.description!!,
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                                         overflow = TextOverflow.Ellipsis,
                                         minLines = 3,
                                         maxLines = 3
@@ -264,13 +237,8 @@ fun DiscoverySearchBar(navController: NavController) {
                                 .fillMaxWidth()
                                 .padding(10.dp)
                         ) {
-                            AsyncImage(
-                                model = it.data.avatar,
-                                contentDescription = "${it.data.username} avatar",
-                                modifier = Modifier.clip(
-                                    CircleShape
-                                )
-                            )
+                            ProfilePicture(url = it.data.avatar!!)
+
                             Text(it.data.username, fontSize = MaterialTheme.typography.labelLarge.fontSize, fontWeight = FontWeight.Bold)
                         }
                     }
