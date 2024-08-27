@@ -46,6 +46,7 @@ import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.NumberInfo
+import com.skythrew.kattpad.screens.utils.ProfilePicture
 import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.serialization.Serializable
 
@@ -100,9 +101,7 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
                             navController.navigateOnce(ProfileScreen(searchResult!!.data.user.username))
                         }) {
-                            AsyncImage(model = searchResult?.data?.user?.avatar, modifier = Modifier.clip(CircleShape), contentDescription = stringResource(
-                                id = R.string.profile_picture
-                            ))
+                            ProfilePicture(url = searchResult!!.data.user.avatar!!)
                             Text(searchResult?.data?.user?.username ?: "", fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(20.dp)) {
