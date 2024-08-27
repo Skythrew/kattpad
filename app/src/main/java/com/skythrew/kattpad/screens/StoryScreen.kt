@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -94,15 +93,15 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
             else
                 Column (horizontalAlignment = Alignment.CenterHorizontally) {
                     Column (verticalArrangement = Arrangement.spacedBy(15.dp), horizontalAlignment = Alignment.CenterHorizontally){
-                        AsyncImage(model = searchResult?.data?.cover, contentDescription = stringResource(
+                        AsyncImage(model = searchResult!!.data.cover, contentDescription = stringResource(
                             id = R.string.cover
                         ))
-                        Text(text = searchResult?.data?.title!!, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
+                        Text(text = searchResult!!.data.title!!, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
                             navController.navigateOnce(ProfileScreen(searchResult!!.data.user.username))
                         }) {
                             ProfilePicture(url = searchResult!!.data.user.avatar!!)
-                            Text(searchResult?.data?.user?.username ?: "", fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
+                            Text(searchResult!!.data.user.username, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                             Button(onClick = { /*TODO*/ }) {
@@ -117,13 +116,13 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                             Button(shape = CircleShape, onClick = { showBottomSheet = true }) {
                                 Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)){
                                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "")
-                                    Text("${searchResult?.data?.numParts} ${stringResource(id = R.string.chapters)}")
+                                    Text("${searchResult!!.data.numParts} ${stringResource(id = R.string.chapters)}")
                                 }
 
                                 if (showBottomSheet)
                                     ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
                                         LazyColumn {
-                                            items(searchResult?.data?.parts!!) {part ->
+                                            items(searchResult!!.data.parts!!) {part ->
                                                 Box (modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable {
@@ -143,15 +142,15 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                             }
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(10.dp)){
-                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.visibility), number = searchResult?.data?.readCount!!)
-                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = searchResult?.data?.commentCount!!)
-                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_favorite_24), number = searchResult?.data?.voteCount!!)
+                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.visibility), number = searchResult!!.data.readCount!!)
+                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_comment_24), number = searchResult!!.data.commentCount!!)
+                            NumberInfo(icon = ImageVector.vectorResource(R.drawable.outline_favorite_24), number = searchResult!!.data.voteCount!!)
                         }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     HorizontalDivider()
                     Column(modifier = Modifier.verticalScroll(ScrollState(0))) {
-                        Text(searchResult?.data?.description!!, modifier = Modifier.padding(20.dp))
+                        Text(searchResult!!.data.description!!, modifier = Modifier.padding(20.dp))
                     }
                 }
         }
