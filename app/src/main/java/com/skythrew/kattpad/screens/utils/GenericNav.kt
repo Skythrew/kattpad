@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavOptionsBuilder
@@ -59,7 +60,19 @@ fun GenericNav(navController: NavController, notificationCount: Int? = null) {
     }
 }
 
-inline fun <reified T: Any> NavController.navigateOnce(route: T, noinline builder: NavOptionsBuilder.() -> Unit = {}) {
-    if (this.currentDestination?.hasRoute<T>() == false)
-        this.navigate(route, builder = builder)
+fun NavController.navigateOnce(route: Any, builder: NavOptionsBuilder.() -> Unit = {}) {
+    if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED)
+        this.navigate(route, builder)
+}
+
+fun NavController.popBackOnce() {
+    if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED)
+        this.popBackStack()
+}
+
+fun NavController.navReplace(route: Any, builder: NavOptionsBuilder.() -> Unit = {}) {
+    if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+        this.popBackStack()
+        this.navigate(route, builder)
+    }
 }
