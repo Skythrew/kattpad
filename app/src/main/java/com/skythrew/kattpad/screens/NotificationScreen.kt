@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,9 +37,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Wattpad
-import com.skythrew.kattpad.api.requests.NotificationItem
 import com.skythrew.kattpad.api.requests.NotificationResponse
 import com.skythrew.kattpad.screens.utils.navigateOnce
 import kotlinx.coroutines.launch
@@ -89,11 +90,137 @@ fun NotificationScreen(padding: PaddingValues, navController: NavController, cli
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(notifications) { notification ->
+                    val notificationData = notification.data
+                    val dateFooter = @Composable { NotificationDateText(date = notification.createDate!!) }
+
                     when(notification.type) {
-                        "upload" -> NotificationUpload(navController = navController, notification = notification)
-                        "comment" -> NotificationComment(navController = navController, notification = notification)
-                        "follow" -> NotificationFollow(navController = navController, notification = notification)
-                        "message" -> NotificationMessage(navController = navController, notification = notification)
+                        "upload" -> {
+                            NotificationRow(
+                                left = {
+                                    ProfilePicture(url = notificationData.story!!.user!!.avatar!!)
+                                },
+                                content = {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.story!!.user!!.username)
+                                            }
+
+                                            append(" ${stringResource(id = R.string.updated_story)} ")
+
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.story!!.title!!)
+                                                append(" - ")
+                                                append(notificationData.story.part!!.title!!)
+                                            }
+                                        }
+                                    )
+                                },
+                                right = {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(notificationData.story!!.cover)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = stringResource(
+                                            id = R.string.cover
+                                        ),
+                                        modifier = Modifier.height(50.dp)
+                                    )
+                                },
+                                footer = dateFooter,
+                                onClick = {
+                                    navController.navigateOnce(
+                                        PartScreen(
+                                            partId = notificationData.story!!.part!!.id!!,
+                                            storyId = notificationData.story.id!!
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        "comment" -> {
+                            NotificationRow(
+                                left = {
+                                    ProfilePicture(url = notificationData.comment!!.user!!.avatar!!)
+                                },
+                                content = {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.comment!!.user!!.username)
+                                            }
+
+                                            append(" ${stringResource(id = when(notificationData.comment!!.parentId == null) {true -> R.string.commented_on false -> R.string.replied_to_comment_on})} ")
+
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.story!!.title!!)
+                                                append(" - ")
+                                                append(notificationData.story.part!!.title!!)
+                                            }
+                                        }
+                                    )
+                                    Text(notificationData.comment!!.body!!)
+                                },
+                                footer = dateFooter,
+                                onClick = {
+                                    navController.navigateOnce(
+                                        PartScreen(
+                                            partId = notificationData.story!!.part!!.id!!,
+                                            storyId = notificationData.story.id!!
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        "follow" -> {
+                            NotificationRow(
+                                left = {
+                                    ProfilePicture(url = notificationData.follower!!.avatar!!)
+                                },
+                                content = {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.follower!!.username)
+                                            }
+
+                                            append(" ${stringResource(id = R.string.just_followed_you)}")
+                                        }
+                                    )
+                                },
+                                footer = dateFooter,
+                                onClick = {
+                                    navController.navigateOnce(
+                                        ProfileScreen(
+                                            username = notificationData.follower!!.username
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        "message" -> {
+                            NotificationRow(
+                                left = {
+                                    ProfilePicture(url = notificationData.message!!.from!!.avatar!!)
+                                },
+                                content = {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.message!!.from!!.username)
+                                            }
+
+                                            append(" ${stringResource(id = R.string.posted_new_announcement)}")
+                                        }
+                                    )
+
+                                    Text(notificationData.message!!.body!!)
+                                },
+                                footer = dateFooter,
+                                onClick = { /* TODO */ }
+                            )
+                        }
                     }
                 }
             }
@@ -101,56 +228,32 @@ fun NotificationScreen(padding: PaddingValues, navController: NavController, cli
 }
 
 @Composable
-fun NotificationMessage(navController: NavController, notification: NotificationItem) {
-    val notificationData = notification.data
-
-    Box (
-        modifier = Modifier.clickable { /* TODO */ }
-    ) {
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Column (
-                verticalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    model = notificationData.message!!.from!!.avatar,
-                    contentDescription = stringResource(
-                        id = R.string.profile_picture
-                    ),
-                    modifier = Modifier.clip(CircleShape)
-                )
-            }
-            Column (
-                modifier = Modifier.weight(1F)
-            ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.message!!.from!!.username)
-                        }
-
-                        append(" ${stringResource(id = R.string.posted_new_announcement)}")
-                    }
-                )
-
-                Text(notificationData.message!!.body!!)
-
-                NotificationDateText(date = notification.createDate!!)
-            }
-        }
-    }
+fun ProfilePicture(url: String) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(url)
+            .crossfade(true)
+            .build(),
+        contentDescription = stringResource(
+            id = R.string.profile_picture
+        ),
+        modifier = Modifier
+            .clip(CircleShape)
+            .width(50.dp)
+            .height(50.dp)
+    )
 }
 
 @Composable
-fun NotificationUpload(navController: NavController, notification: NotificationItem) {
-    val notificationData = notification.data
-
+fun NotificationRow(
+    left: @Composable () -> Unit = {},
+    right: @Composable () -> Unit = {},
+    content: @Composable () -> Unit = {},
+    footer: @Composable () -> Unit = {},
+    onClick: () -> Unit = {}
+) {
     Box (
-        modifier = Modifier.clickable { navController.navigateOnce(PartScreen(partId = notificationData.story!!.part!!.id!!, storyId = notificationData.story.id!!)) }
+        modifier = Modifier.clickable { onClick() }
     ) {
         Row (
             modifier = Modifier
@@ -161,134 +264,18 @@ fun NotificationUpload(navController: NavController, notification: NotificationI
             Column (
                 verticalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = notificationData.story!!.user!!.avatar,
-                    contentDescription = stringResource(
-                        id = R.string.profile_picture
-                    ),
-                    modifier = Modifier.clip(CircleShape)
-                )
+                left()
             }
             Column (
                 modifier = Modifier.weight(1F)
             ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.story!!.user!!.username)
-                        }
-
-                        append(" ${stringResource(id = R.string.updated_story)} ")
-
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.story!!.title!!)
-                            append(" - ")
-                            append(notificationData.story.part!!.title!!)
-                        }
-                    }
-                )
-                NotificationDateText(date = notification.createDate!!)
+                content()
+                footer()
             }
-            Column {
-                AsyncImage(
-                    model = notificationData.story!!.cover,
-                    contentDescription = stringResource(
-                        id = R.string.cover
-                    ),
-                    modifier = Modifier.height(50.dp)
-                )
-            }
-        }
-    }
-
-}
-
-@Composable
-fun NotificationComment(navController: NavController, notification: NotificationItem) {
-    val notificationData = notification.data
-
-    Box (
-        modifier = Modifier.clickable { navController.navigateOnce(PartScreen(partId = notificationData.story!!.part!!.id!!, storyId = notificationData.story.id!!)) }
-    ) {
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
             Column (
                 verticalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = notificationData.comment!!.user!!.avatar,
-                    contentDescription = stringResource(
-                        id = R.string.profile_picture
-                    ),
-                    modifier = Modifier.clip(CircleShape)
-                )
-            }
-            Column (
-                modifier = Modifier.weight(1F)
-            ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.comment!!.user!!.username)
-                        }
-
-                        append(" ${stringResource(id = when(notificationData.comment!!.parentId == null) {true -> R.string.commented_on false -> R.string.replied_to_comment_on})} ")
-
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.story!!.title!!)
-                            append(" - ")
-                            append(notificationData.story.part!!.title!!)
-                        }
-                    }
-                )
-                Text(notificationData.comment!!.body!!)
-                NotificationDateText(date = notification.createDate!!)
-            }
-        }
-    }
-}
-
-@Composable
-fun NotificationFollow(navController: NavController, notification: NotificationItem) {
-    val notificationData = notification.data
-
-    Box (
-        modifier = Modifier.clickable { navController.navigateOnce(ProfileScreen(username = notificationData.follower!!.username)) }
-    ) {
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Column (
-                verticalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    model = notificationData.follower!!.avatar,
-                    contentDescription = stringResource(
-                        id = R.string.profile_picture
-                    ),
-                    modifier = Modifier.clip(CircleShape)
-                )
-            }
-            Column (
-                modifier = Modifier.weight(1F)
-            ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(notificationData.follower!!.username)
-                        }
-
-                        append(" ${stringResource(id = R.string.just_followed_you)}")
-                    }
-                )
-                NotificationDateText(date = notification.createDate!!)
+                right()
             }
         }
     }
