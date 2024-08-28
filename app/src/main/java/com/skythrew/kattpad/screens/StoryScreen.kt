@@ -98,10 +98,10 @@ fun StoryScreen(padding: PaddingValues, navController: NavController, client: Wa
                         ))
                         Text(text = searchResult!!.data.title!!, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
                         Row (verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.clickable {
-                            navController.navigateOnce(ProfileScreen(searchResult!!.data.user.username))
+                            navController.navigateOnce(ProfileScreen(searchResult!!.data.user!!.username))
                         }) {
-                            ProfilePicture(url = searchResult!!.data.user.avatar!!)
-                            Text(searchResult!!.data.user.username, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
+                            ProfilePicture(url = searchResult!!.data.user!!.avatar!!)
+                            Text(searchResult!!.data.user!!.username, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize)
                         }
                         Row (horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                             Button(onClick = { /*TODO*/ }) {

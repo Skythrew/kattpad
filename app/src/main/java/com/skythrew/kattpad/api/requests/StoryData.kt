@@ -45,7 +45,7 @@ data class StoryPartData (
 
 @Serializable
 data class StoryData(
-    val id: Int,
+    val id: Int? = null,
     val title: String? = null,
     val length: Int? = null,
     @Serializable(with = DateSerializer::class) val createDate: Date? = null,
@@ -69,7 +69,7 @@ data class StoryData(
     val firstPublishedPart: StoryPartData? = null,
     val lastPublishedPart: StoryPartData? = null,
     val parts: List<StoryPartData>? = null,
-    val user: MinUserData,
+    val user: MinUserData? = null,
     val deleted: Boolean? = null,
     val readingPosition: StoryReadingPosition? = null,
     @Serializable(with = DateSerializer::class) val dateAdded: Date? = null

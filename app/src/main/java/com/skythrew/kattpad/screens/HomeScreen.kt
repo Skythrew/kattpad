@@ -149,7 +149,7 @@ fun Library(navController: NavController, client: Wattpad) {
                         progress = {currentPartNumber.toFloat() / story.numParts},
                         onClick = {
                             navController.navigateOnce(
-                                PartScreen(partId = currentPartId, storyId = story.id)
+                                PartScreen(partId = currentPartId, storyId = story.id!!)
                             )
                         }
                     )
@@ -195,7 +195,7 @@ fun DiscoverySearchBar(navController: NavController, client: Wattpad) {
                                 .padding(10.dp)
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.navigateOnce(StoryScreen(it.data.id))
+                                    navController.navigateOnce(StoryScreen(it.data.id!!))
                                 }
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
