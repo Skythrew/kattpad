@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +55,14 @@ import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Story
 import com.skythrew.kattpad.api.User
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.api.WattpadList
+import com.skythrew.kattpad.api.requests.ReadingListStoriesResponse
+import com.skythrew.kattpad.api.requests.StoryData
 import com.skythrew.kattpad.screens.utils.ProfilePicture
 import com.skythrew.kattpad.screens.utils.StoryElement
 import com.skythrew.kattpad.screens.utils.navigateOnce
 import com.skythrew.kattpad.screens.utils.popBackOnce
+import com.skythrew.kattpad.screens.utils.reachedLast
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
@@ -181,6 +186,8 @@ fun ProfileScreen(navController: NavController, client: Wattpad, username: Strin
                             title = stringResource(id = R.string.following),
                             maxCount = user!!.data.numFollowing!!
                         )
+
+                    ReadingListsSection(navController = navController, user = user!!)
                 }
             }
         }
@@ -193,7 +200,7 @@ fun ProfileScreen(navController: NavController, client: Wattpad, username: Strin
                     modifier = Modifier
                         .padding(10.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
 
                     InfoModalSection(
@@ -304,12 +311,122 @@ fun StoriesRow(navController: NavController, user: User) {
                     StoryElement(
                         coverUrl = story.data.cover!!,
                         text = story.data.title!!,
-                        onClick = { navController.navigateOnce(StoryScreen(story.data.id)) }
+                        onClick = { navController.navigateOnce(StoryScreen(story.data.id!!)) }
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+fun ReadingListsSection(navController: NavController, user: User) {
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+
+    var readingLists: List<WattpadList> by remember {
+        mutableStateOf(listOf())
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        isLoading = true
+        readingLists = user.fetchLists(fields = setOf("name"))
+        isLoading = false
+    }
+
+    if (!isLoading) {
+        Column (
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            readingLists.forEach { readingList ->
+                ReadingListElement(
+                    list = readingList,
+                    onStoryClick = { storyId ->
+                        navController.navigateOnce(
+                            StoryScreen(storyId = storyId)
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ReadingListElement(
+    list: WattpadList,
+    onStoryClick: (storyId: Int) -> Unit = {}
+) {
+    val lazyRowState = rememberLazyListState()
+
+    val reachedLast: Boolean by remember {
+        derivedStateOf {
+            lazyRowState.reachedLast(5)
+        }
+    }
+
+    var storiesResponse: ReadingListStoriesResponse? by remember {
+        mutableStateOf(null)
+    }
+
+    var stories: List<StoryData> by remember {
+        mutableStateOf(listOf())
+    }
+
+    var offset by remember {
+        mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(key1 = offset) {
+        storiesResponse = list.fetchStories(setOf("total", "stories(id,title,cover)"), offset = offset)
+        stories = stories.plus(storiesResponse!!.stories)
+    }
+
+    LaunchedEffect(key1 = reachedLast) {
+        if (reachedLast && storiesResponse != null)
+            if (stories.isNotEmpty() && offset < storiesResponse!!.total!! - 1)
+                offset += 10
+    }
+
+    if (storiesResponse != null) {
+        if (stories.isNotEmpty())
+            Column {
+                Text(
+                    list.data.name!!,
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
+
+                Text(
+                    stringResource(id = R.string.reading_list),
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                    fontWeight = FontWeight.Thin,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp),
+                    state = lazyRowState
+                ) {
+                    items(stories) { story ->
+                        StoryElement(
+                            coverUrl = story.cover!!,
+                            text = story.title!!,
+                            onClick = { onStoryClick(story.id!!) }
+                        )
+                    }
+                }
+            }
+    }
+    else
+        Row (
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            CircularProgressIndicator()
+        }
 }
 
 @Composable
