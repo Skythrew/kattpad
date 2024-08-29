@@ -96,7 +96,8 @@ data class NotificationData(
     @SerialName("notification_instance_id") val notificationInstanceId: String? = null,
     val followed: MinUserData? = null,
     val follower: MinUserData? = null,
-    val message: NotificationUserMessageData? = null
+    val message: NotificationUserMessageData? = null,
+    val voter: MinUserData? = null
 ) : Parcelable
 
 @Serializable

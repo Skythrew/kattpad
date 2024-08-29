@@ -64,7 +64,7 @@ fun NotificationScreen(padding: PaddingValues, navController: NavController, cli
         mutableStateOf(null)
     }
 
-    var notifications: List<NotificationItem> by remember {
+    var notifications: List<NotificationItem> by rememberSaveable {
         mutableStateOf(listOf())
     }
 
@@ -234,6 +234,51 @@ fun NotificationScreen(padding: PaddingValues, navController: NavController, cli
                                 },
                                 footer = dateFooter,
                                 onClick = { /* TODO */ }
+                            )
+                        }
+                        "vote" -> {
+                            NotificationRow(
+                                left = {
+                                    ProfilePicture(url = notificationData.voter!!.avatar!!)
+                                },
+                                content = {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.voter!!.username)
+                                            }
+
+                                            append(" ${stringResource(id = R.string.voted_for)} ")
+
+                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                append(notificationData.story!!.title)
+                                                append(" - ")
+                                                append(notificationData.story.part!!.title)
+                                            }
+                                        }
+                                    )
+                                },
+                                right = {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(notificationData.story!!.cover)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = stringResource(
+                                            id = R.string.cover
+                                        ),
+                                        modifier = Modifier.height(50.dp)
+                                    )
+                                },
+                                footer = dateFooter,
+                                onClick = {
+                                    navController.navigateOnce(
+                                        PartScreen(
+                                            partId = notificationData.story!!.part!!.id!!,
+                                            storyId = notificationData.story.id!!
+                                        )
+                                    )
+                                }
                             )
                         }
                     }
