@@ -18,8 +18,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -37,9 +39,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.skythrew.kattpad.R
 import com.skythrew.kattpad.api.Wattpad
+import com.skythrew.kattpad.api.requests.NotificationItem
 import com.skythrew.kattpad.api.requests.NotificationResponse
 import com.skythrew.kattpad.screens.utils.ProfilePicture
 import com.skythrew.kattpad.screens.utils.navigateOnce
+import com.skythrew.kattpad.screens.utils.reachedLast
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.util.Date
@@ -47,28 +51,41 @@ import java.util.Date
 @Composable
 fun NotificationScreen(padding: PaddingValues, navController: NavController, client: Wattpad) {
     val lazyColState = rememberLazyListState()
+
+    val reachedLast by remember {
+        derivedStateOf {
+            lazyColState.reachedLast(5)
+        }
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     var notificationResponse: NotificationResponse? by rememberSaveable {
         mutableStateOf(null)
     }
 
-    val notifications = notificationResponse?.feed?.filter { item -> item.type != "generic" }
+    var notifications: List<NotificationItem> by remember {
+        mutableStateOf(listOf())
+    }
 
-    LaunchedEffect(lazyColState.canScrollForward) {
+    var newestId: Long? by remember {
+        mutableStateOf(null)
+    }
+
+    LaunchedEffect(key1 = Unit) {
         coroutineScope.launch {
             client.markNotificationsAsRead()
         }
+    }
 
-        if(!lazyColState.canScrollForward) {
-            if (notificationResponse == null)
-                notificationResponse = client.fetchNotifications(limit = 15)
-            else if (notificationResponse!!.hasMore!!) {
-                val res = client.fetchNotifications(limit = 15, newestId = notificationResponse!!.feed!!.last().id)
+    LaunchedEffect(key1 = newestId) {
+        notificationResponse = client.fetchNotifications(limit = 25, newestId = newestId)
+        notifications = notifications.plus(notificationResponse!!.feed!!)
+    }
 
-                if (res != null)
-                    notificationResponse = notificationResponse!!.copy(feed = notificationResponse!!.feed!!.plus(res.feed!!), hasMore = res.hasMore)
-            }
+    LaunchedEffect(key1 = reachedLast) {
+        if(reachedLast && notificationResponse != null && notificationResponse!!.total!! != 0) {
+            newestId = notificationResponse!!.feed!!.last().id
         }
     }
 
@@ -79,7 +96,7 @@ fun NotificationScreen(padding: PaddingValues, navController: NavController, cli
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (notifications == null)
+        if (notificationResponse == null)
             CircularProgressIndicator()
         else
             LazyColumn (

@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ import com.skythrew.kattpad.screens.utils.ProfilePicture
 import com.skythrew.kattpad.screens.utils.StoryElement
 import com.skythrew.kattpad.screens.utils.StoryPicture
 import com.skythrew.kattpad.screens.utils.navigateOnce
+import com.skythrew.kattpad.screens.utils.reachedLast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -181,8 +183,14 @@ fun DiscoverySearchBar(navController: NavController, client: Wattpad) {
                 LazyListState()
             }
 
-            LaunchedEffect(key1 = listState.canScrollForward) {
-                if (!listState.canScrollForward) {
+            val reachedLast by remember {
+                derivedStateOf {
+                    listState.reachedLast(5)
+                }
+            }
+
+            LaunchedEffect(key1 = reachedLast) {
+                if (reachedLast) {
                     offset.intValue += 10
                 }
             }

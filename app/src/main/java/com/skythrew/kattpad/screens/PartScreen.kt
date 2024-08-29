@@ -43,6 +43,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +72,7 @@ import com.skythrew.kattpad.api.Wattpad
 import com.skythrew.kattpad.screens.utils.getFormattedNumber
 import com.skythrew.kattpad.screens.utils.navReplace
 import com.skythrew.kattpad.screens.utils.navigateOnce
+import com.skythrew.kattpad.screens.utils.reachedLast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -202,7 +204,9 @@ fun PartScreen(navController: NavController, client: Wattpad, storyId: Int, id: 
                     }
 
                     Box (
-                        modifier = Modifier.clickable { showPartsModal = true }.clip(CircleShape)
+                        modifier = Modifier
+                            .clickable { showPartsModal = true }
+                            .clip(CircleShape)
                     ) {
                         Text(
                             text = part?.data?.title!!,
@@ -294,6 +298,9 @@ fun CommentsModal(showModal: MutableState<Boolean>, part: Part, client: Wattpad,
     val focusManager = LocalFocusManager.current
 
     val lazyColState = rememberLazyListState()
+    val reachedLast by remember {
+        derivedStateOf { lazyColState.reachedLast(5) }
+    }
 
     var commentText by remember {
         mutableStateOf("")
@@ -332,8 +339,8 @@ fun CommentsModal(showModal: MutableState<Boolean>, part: Part, client: Wattpad,
             commentsLoading = false
         }
 
-        LaunchedEffect(lazyColState.canScrollForward) {
-            if(comments.isNotEmpty() && !lazyColState.canScrollForward && commentsLeft) {
+        LaunchedEffect(reachedLast) {
+            if(comments.isNotEmpty() && reachedLast && commentsLeft) {
                 after = comments.last().data.commentId.resourceId
             }
         }

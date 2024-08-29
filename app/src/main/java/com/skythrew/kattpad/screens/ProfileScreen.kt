@@ -438,6 +438,10 @@ fun UsersRow(
 ) {
     val lazyRowState = rememberLazyListState()
 
+    val reachedLast by remember {
+        derivedStateOf { lazyRowState.reachedLast(5) }
+    }
+
     var offset by remember {
         mutableIntStateOf(0)
     }
@@ -450,11 +454,8 @@ fun UsersRow(
         mutableStateOf(true)
     }
 
-    LaunchedEffect(key1 = lazyRowState.canScrollForward) {
-        if (!lazyRowState.canScrollForward &&
-            lazyRowState.canScrollBackward &&
-            fetchedUsers.count() < maxCount
-        )
+    LaunchedEffect(key1 = reachedLast) {
+        if (reachedLast && fetchedUsers.count() < maxCount)
             offset += 10
     }
 
