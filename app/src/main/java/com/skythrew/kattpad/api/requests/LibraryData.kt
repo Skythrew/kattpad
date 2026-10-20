@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class LibraryData(
     val stories: List<StoryData>,
     val total: Int,
-    @SerialName("last_sync_timestamp") val lastSyncTimestamp: String
+    @SerialName("last_sync_timestamp") val lastSyncTimestamp: Long
 )
