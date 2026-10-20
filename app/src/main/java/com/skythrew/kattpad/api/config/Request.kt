@@ -202,7 +202,7 @@ open class Request {
      * @param limit The maximum number of objects to fetch (may be useless depending on requests)
      * @param offset The request offset (may be useless depending on requests)
      */
-    suspend inline fun <reified T> fetchObjData(api: String, path: String, fields: Set<String>, limit: Int = 0, offset: Int = 0): T {
+    suspend inline fun <reified T> fetchObjData(api: String, path: String, fields: Set<String>, limit: Int = 10, offset: Int = 0): T {
         val params: Map<String, String> = mapOf(
             "offset" to offset.toString(),
             when { fields.isNotEmpty() -> "fields" to fields.joinToString(",") else -> "" to ""},

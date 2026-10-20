@@ -5,7 +5,6 @@ import com.skythrew.kattpad.api.requests.FollowingResult
 import com.skythrew.kattpad.api.requests.LibraryData
 import com.skythrew.kattpad.api.requests.ListsResult
 import com.skythrew.kattpad.api.requests.UserData
-import com.skythrew.kattpad.api.requests.UserMessagesResponse
 import com.skythrew.kattpad.api.requests.UserStoriesResult
 import io.ktor.http.HttpStatusCode
 
@@ -30,7 +29,7 @@ class User (
      *
      * @return A list of users
      */
-    suspend fun fetchFollowers(fields: Set<String> = setOf(), limit: Int = 0, offset: Int = 0): List<User> {
+    suspend fun fetchFollowers(fields: Set<String> = setOf(), limit: Int = 10, offset: Int = 0): List<User> {
         val followersResult = client.fetchObjData<FollowersResult>("v3", "$userRequest/followers", setOf("total", "users(username,${fields.joinToString(",")})"), limit, offset)
 
         return followersResult.users.map {data -> User(client, data) }
@@ -45,7 +44,7 @@ class User (
      *
      * @return A list of users
      */
-    suspend fun fetchFollowing(fields: Set<String> = setOf(), limit: Int = 0, offset: Int = 0): List<User> {
+    suspend fun fetchFollowing(fields: Set<String> = setOf(), limit: Int = 10, offset: Int = 0): List<User> {
         val followingResult = client.fetchObjData<FollowingResult>("v3", "$userRequest/following", setOf("total", "users(username,${fields.joinToString(",")})"), limit, offset)
 
         return followingResult.users.map {data -> User(client, data) }
@@ -59,7 +58,7 @@ class User (
      *
      * @return A list of reading lists
      */
-    suspend fun fetchLists(fields: Set<String> = setOf(), limit: Int = 0): List<WattpadList> {
+    suspend fun fetchLists(fields: Set<String> = setOf(), limit: Int = 10): List<WattpadList> {
         val listsResult = client.fetchObjData<ListsResult>("v3", "$userRequest/lists", setOf("total", "lists(id,${fields.joinToString(",")})"), limit, offset = 0)
 
         return listsResult.lists.map {data -> WattpadList(client, data) }
@@ -74,7 +73,7 @@ class User (
      *
      * @return A list of stories
      */
-    suspend fun fetchStories(fields: Set<String> = setOf("title"), limit: Int = 0, offset: Int = 0): List<Story> {
+    suspend fun fetchStories(fields: Set<String> = setOf("title"), limit: Int = 10, offset: Int = 0): List<Story> {
         val storiesResult = client.fetchObjData<UserStoriesResult>("v4", "$userRequest/stories/published", setOf("total", "stories(id,user,${fields.joinToString(",")})"), limit, offset)
 
         return storiesResult.stories.map {data -> Story(client, data) }

@@ -34,7 +34,7 @@ data class Part (
      * @param limit The maximum number of comments to fetch
      * @param after A comment ID which is used to only fetch comments after the one with the given ID
      */
-    suspend fun fetchComments(limit: Int = 0, after: String? = null): Pair<Boolean, List<Comment>> {
+    suspend fun fetchComments(limit: Int = 10, after: String? = null): Pair<Boolean, List<Comment>> {
         val res = client.getAPI("v5", "comments/namespaces/parts/resources/${data.id}/comments") {
             url {
                 parameters.append("limit", limit.toString())

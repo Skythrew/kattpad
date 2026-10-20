@@ -46,7 +46,7 @@ class Wattpad : Authentication() {
      * @param newestId The newest notification to fetch (acts as a kind of offset)
      * @return `NotificationResponse` or `null` if the client is not logged in
      */
-    suspend fun fetchNotifications(fields: Set<String> = setOf(), limit: Int = 0, newestId: Long? = null): NotificationResponse? {
+    suspend fun fetchNotifications(fields: Set<String> = setOf(), limit: Int = 10, newestId: Long? = null): NotificationResponse? {
         if (!this.loggedIn)
             return null
 

@@ -68,7 +68,7 @@ class Comment (
      * @param fields Request fields to fetch (defaults to all fields)
      * @param limit The maximum number of replies to fetch (may be useless ??)
      */
-    suspend fun fetchReplies(fields: Set<String> = setOf(), limit: Int = 0): List<Comment> {
+    suspend fun fetchReplies(fields: Set<String> = setOf(), limit: Int = 10): List<Comment> {
         val repliesResult = client.fetchObjData<CommentsResult>(
             api = "v5",
             path = "comments/namespaces/comments/resources/${data.commentId.resourceId}/comments",

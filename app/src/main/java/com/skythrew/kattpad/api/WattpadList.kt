@@ -22,7 +22,7 @@ class WattpadList (
      *
      * @return `ReadingListStoriesResponse` -> raw API response
      */
-    suspend fun fetchStories(fields: Set<String> = setOf(), limit: Int = 0, offset: Int = 0): ReadingListStoriesResponse {
+    suspend fun fetchStories(fields: Set<String> = setOf(), limit: Int = 10, offset: Int = 0): ReadingListStoriesResponse {
         return client.fetchObjData<ReadingListStoriesResponse>(
             api = "v3",
             path = "lists/${data.id}/stories",
